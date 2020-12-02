@@ -1,0 +1,61 @@
+package com.arneplant.logisticainterna_kot2.network
+
+import android.content.Context
+import android.util.Log
+import com.arneplant.logisticainterna_kot2.model.dto.Consumo
+import com.beust.klaxon.Klaxon
+
+object MqttCliente {
+
+    private var cliente : MqttClientHelper? = null
+
+    fun iniciar(ctx: Context,operario: String){
+        this.cliente = MqttClientHelper(ctx,operario)
+    }
+
+
+    fun asociarTarea(ipAutomata: String,numPrensa: Int, idTarea:Int, paresTarea: Int, codigoOF: String, utillaje:String,tallaUtillaje:String, tallaArticulo:String, codigoEtiqueta:String){
+        val topic = "/moldeado/plc/${ipAutomata}/asociarTarea"
+
+        val msg = "${numPrensa.toString().padStart(LEN_NUMPRENSA)};" +
+                "${idTarea.toString().padStart(LEN_IDTAREA,'0')};" +
+                "${paresTarea.toString().padStart(LEN_PARESTAREA,'0')};" +
+                "${codigoOF.padStart(LEN_CODIGOOF)};" +
+                "${utillaje.padStart(LEN_UTILLAJE)};" +
+                "${tallaUtillaje.padStart(LEN_TALLAUTILLAJE)};" +
+                "${tallaArticulo.padStart(LEN_TALLAARTICULO)};" +
+                "${codigoEtiqueta.padStart(LEN_ETIQUETA)}"
+
+        publicar(msg,topic)
+    }
+
+    fun consumirTarea(consumo: Consumo){
+        val topic = "/ordenFabricacion/${consumo.idOrden}/${consumo.codSeccion}/consumo"
+        val msg = """
+            {
+            "CodigoOrden": ${consumo.codigoOrden},
+            "IdMaquina": ${consumo.idMaquina},
+            "CodSeccion": ${consumo.codSeccion},
+            "CantidadPaquete": ${consumo.cantidadPaquete}
+            }
+        """.trimIndent()
+        publicar(msg,topic)
+    }
+
+    private fun publicar(msg: String, topic:String){
+        try {
+            this.cliente?.publish(topic,msg)
+        }catch (ex: Exception){
+            Log.d("error mqtt",ex.message)
+        }
+    }
+
+    fun cerrar(){
+        try {
+            this.cliente?.destroy()
+        }catch (ex: Exception){
+            Log.d("error mqtt ",ex.message)
+        }
+    }
+
+}

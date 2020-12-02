@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SacarDeMaquinaActivity">
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="0">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <fragment android:name="com.arneplant.logisticainterna_kot2.fragment.BuscadorFragment"
+                android:id="@+id/frgBuscador"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <ListView android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/lista">
+
+            </ListView>
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <info.hoang8f.widget.FButton
+                        android:id="@+id/btAtras"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="1dp"
+                        android:onClick="atras"
+                        android:text="Atras"
+                        android:textColor="@color/white"
+                        android:textAlignment="center"
+                        android:textSize="20sp"
+                        android:layout_weight="1"/>
+                    <info.hoang8f.widget.FButton
+                        android:id="@+id/btHome"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="1dp"
+                        android:text=""
+                        android:textColor="@color/white"
+                        android:textAlignment="center"
+                        android:textSize="20sp"
+                        android:layout_weight="1"/>
+
+                    <info.hoang8f.widget.FButton
+                        android:id="@+id/btLimpiar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="1dp"
+                        android:layout_weight="1"
+                        android:text="Limpiar"
+                        android:onClick="limpiar"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textSize="20sp" />
+
+                </TableRow>
+            </TableLayout>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <fragment android:name="com.arneplant.logisticainterna_kot2.fragment.LogFragment"
+                android:id="@+id/frgLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </TableRow>
+    </TableLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

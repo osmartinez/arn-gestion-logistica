@@ -1,0 +1,84 @@
+<LinearLayout
+    android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="0. OF00000 - ML0000 - 42"
+        android:padding="10dp"
+        android:id="@+id/tbTitulo"
+        android:textSize="18sp"
+        android:textStyle="bold|italic"
+        android:background="@color/purple"
+        android:clickable="true"
+        android:textColor="@color/white" />
+
+    <RelativeLayout
+        android:id="@+id/panel1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:background="@color/lightBlue">
+
+        <TextView
+            android:id="@+id/tbCliente"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/tbFechaFin"
+            android:layout_alignParentLeft="true"
+            android:padding="10sp"
+            android:text="CLIENTE S.A."
+            android:textSize="14sp"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"/>
+
+        <TextView
+            android:id="@+id/tbFechaFin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="ACABA DENTRO DE 10 HORAS" />
+
+    </RelativeLayout>
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:id="@+id/panel2"
+        android:background="@color/lightBlue">
+
+        <TextView
+            android:id="@+id/tbParesPendientes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btRestaurar"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:padding="10sp"
+            android:text="0 PARES PENDIENTES"
+            android:textSize="14sp" />
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btRestaurar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="Modificar"
+            android:autoText="true"
+            android:background="@color/grey"
+            android:padding="10dp"
+            android:enabled="false"
+            android:backgroundTint="@color/grey"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+
+    </RelativeLayout>
+</LinearLayout>

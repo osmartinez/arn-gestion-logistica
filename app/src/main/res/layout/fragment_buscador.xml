@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.BuscadorFragment">
+
+    <EditText
+        android:id="@+id/tbCodigo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/buscador_style"
+        android:drawableLeft="@drawable/cb_50x50"
+        android:drawablePadding="20dp"
+        android:hint="Código etiqueta"
+        android:inputType="text"
+        android:paddingBottom="5dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="12dp"
+        android:paddingTop="5dp" />
+
+</FrameLayout>

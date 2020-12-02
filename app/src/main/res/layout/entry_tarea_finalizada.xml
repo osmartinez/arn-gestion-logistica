@@ -1,0 +1,75 @@
+<LinearLayout
+    android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp" >
+
+
+    <RelativeLayout
+        android:id="@+id/panel1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:background="@color/fbutton_color_alizarin">
+
+        <TextView
+            android:id="@+id/tbCliente"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/tbFechaFin"
+            android:layout_alignParentLeft="true"
+            android:padding="10sp"
+            android:text="CLIENTE S.A."
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"
+            android:textColor="@color/white"/>
+
+        <TextView
+            android:id="@+id/tbNombreMaquina"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:textColor="@color/white"
+            android:text="MOLDE ESPUMA 100" />
+
+    </RelativeLayout>
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:id="@+id/panel2"
+        android:background="@color/fbutton_color_alizarin">
+
+        <TextView
+            android:id="@+id/tbOrdenTalla"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/tbParesFabricados"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:padding="10sp"
+            android:text="OF00023 - 42"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tbParesFabricados"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="100 pares"
+            android:padding="10dp"
+            android:enabled="false"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+
+    </RelativeLayout>
+</LinearLayout>

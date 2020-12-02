@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name='LogisticaInterna_kot2'

@@ -1,0 +1,88 @@
+<LinearLayout
+    android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="MOLDE 100B"
+        android:padding="10dp"
+        android:id="@+id/tbNombreMaquina"
+        android:textSize="18sp"
+        android:textStyle="bold|italic"
+        android:background="@color/fbutton_color_midnight_blue"
+        android:clickable="true"
+        android:textColor="@color/white" />
+
+    <RelativeLayout
+        android:id="@+id/panel1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:background="@color/fbutton_color_carrot">
+
+        <TextView
+            android:id="@+id/tbNumeroOrdenes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btMasInfo"
+            android:layout_alignParentLeft="true"
+            android:padding="10sp"
+            android:text="2 Ordenes de Fabricación"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"/>
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btMasInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="+ info"
+            android:autoText="true"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+
+    </RelativeLayout>
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:id="@+id/panel2"
+        android:background="@color/fbutton_color_carrot">
+
+        <TextView
+            android:id="@+id/tbParesRecogidos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btRestaurar"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:textColor="@color/white"
+            android:padding="10sp"
+            android:text="26 Cajas  |  200 Pares"
+            android:textSize="20sp" />
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btRestaurar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="Restaurar"
+            android:autoText="true"
+            android:padding="10dp"
+            android:backgroundTint="@color/red"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+
+    </RelativeLayout>
+</LinearLayout>

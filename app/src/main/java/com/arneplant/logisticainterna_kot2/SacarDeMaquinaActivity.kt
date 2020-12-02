@@ -1,0 +1,371 @@
+package com.arneplant.logisticainterna_kot2
+
+import android.app.Dialog
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.media.MediaPlayer
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.view.View
+import com.arneplant.logisticainterna_kot2.adapter.ConsumoMaquinaAdapter
+import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
+import com.arneplant.logisticainterna_kot2.delegate.RestaurarConsumosDelegate
+import com.arneplant.logisticainterna_kot2.fragment.LogFragment
+import com.arneplant.logisticainterna_kot2.model.CodigoRespuesta
+import com.arneplant.logisticainterna_kot2.model.Maquina
+import com.arneplant.logisticainterna_kot2.model.Respuesta
+import com.arneplant.logisticainterna_kot2.model.dto.Consumo
+import com.arneplant.logisticainterna_kot2.util.Dialogos
+import com.arneplant.logisticainterna_kot2.util.Tipo
+import com.arneplant.logisticainterna_kot2.util.Utils
+import kotlinx.android.synthetic.main.activity_programacion_maquina.*
+import kotlinx.android.synthetic.main.activity_sacar_de_maquina.*
+import kotlinx.android.synthetic.main.activity_sacar_de_maquina.frgLog
+import kotlinx.android.synthetic.main.activity_sacar_de_maquina.lista
+import okhttp3.internal.Util
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
+import com.arneplant.logisticainterna_kot2.model.dto.Desconsumo
+import com.arneplant.logisticainterna_kot2.model.dto.MaquinaEtiqueta
+import com.arneplant.logisticainterna_kot2.network.MqttCliente
+import com.arneplant.logisticainterna_kot2.network_implementation.*
+
+
+class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
+    RestaurarConsumosDelegate {
+
+    private val sharedPrefFile = "preferencias_notificacion"
+    private val NOTIFICAR_TAREA = "NOTIFICAR_TAREA"
+    private val NOTIFICAR_NOTA = "NOTIFICAR_NOTA"
+    private var adapter: ConsumoMaquinaAdapter? = null
+    private var ctx: Context? = null
+    private var maquina: Maquina? = null
+    private var maquinas = ArrayList<Maquina>()
+    private var log: LogFragment? = null
+    private var buzzer: MediaPlayer? = null
+    private var buzzerTareaAcabada: MediaPlayer? = null
+    private var buzzerNotaAcabada: MediaPlayer? = null
+    private var buzzerMultioperacion: MediaPlayer? = null
+    private var sharedPreferences: SharedPreferences? = null
+    private var idOperario: Int = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_sacar_de_maquina)
+
+        this.ctx = this
+        val sharedPref = this.getSharedPreferences("MEMORIA_INTERNA",Context.MODE_PRIVATE) ?: return
+        val defaultValue = null
+        val defaultValueInt = 0
+        val codigoOperario = sharedPref.getString("OPERARIO_CODIGO", defaultValue)
+        val nombreOperario = sharedPref.getString("OPERARIO_NOMBRE", defaultValue)
+        idOperario = sharedPref.getInt("OPERARIO_ID", defaultValueInt)
+
+        if(codigoOperario != null && nombreOperario!=null){
+            this.title = "${codigoOperario} - Sacar de máquina"
+        }
+        else{
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            this.finish()
+        }
+        this.adapter = ConsumoMaquinaAdapter(this, maquinas)
+        this.lista.adapter = this.adapter
+        this.log = frgLog as LogFragment
+        this.buzzer = MediaPlayer.create(this, R.raw.buzzer)
+        this.buzzerNotaAcabada = MediaPlayer.create(this, R.raw.notacompletada)
+        this.buzzerTareaAcabada = MediaPlayer.create(this, R.raw.tareacompletada)
+        this.buzzerMultioperacion = MediaPlayer.create(this, R.raw.multioperacion)
+        this.sharedPreferences = this.getSharedPreferences(sharedPrefFile, Context.MODE_PRIVATE)
+    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_sacar_de_maquina, menu)
+        if (sharedPreferences == null) {
+            this.sharedPreferences = this.getSharedPreferences(sharedPrefFile, Context.MODE_PRIVATE)
+        }
+        var itemNotificarTarea = menu.findItem(R.id.notificarTarea)
+        itemNotificarTarea.isChecked = sharedPreferences?.getBoolean(NOTIFICAR_TAREA, true)!!
+        var itemNotificarNota = menu.findItem(R.id.notificarNota)
+        itemNotificarNota.isChecked = sharedPreferences?.getBoolean(NOTIFICAR_NOTA, true)!!
+        return true
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here.
+        val id = item.getItemId()
+
+        if (id == R.id.notificarTarea) {
+            item.isChecked = (!item.isChecked)
+            val editor: SharedPreferences.Editor = sharedPreferences?.edit()!!
+            editor.putBoolean(NOTIFICAR_TAREA, item.isChecked)
+            editor.apply()
+            editor.commit()
+            return true
+        }
+        if (id == R.id.notificarNota) {
+            item.isChecked = (!item.isChecked)
+            val editor: SharedPreferences.Editor = sharedPreferences?.edit()!!
+            editor.putBoolean(NOTIFICAR_NOTA, item.isChecked)
+            editor.apply()
+            editor.commit()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+
+    }
+
+    /**
+     * Se dispara cuando se lee un código de barras
+     * Discrimina el tipo de código de barras y ejecuta la función adecuada
+     */
+    override fun buscadorFragmentCodigoEscaneado(msg: String) {
+        when (Utils.getTipo(msg)) {
+            Tipo.Maquina -> {
+                findMaquina(msg)
+            }
+            Tipo.PrePaqueteAgrupacion -> {
+                consumirEtiqueta(msg)
+            }
+            Tipo.PrePaquete -> {
+                consumirEtiqueta(msg)
+            }
+        }
+    }
+
+    /**
+     * Consume una etiqueta en la máquina que esté seleccionada actualmente
+     */
+    private fun consumirEtiqueta(msg: String) {
+        if (this.maquina == null) {
+            Dialogos.mostrarDialogoInformacion("Primero selecciona una máquina", this)
+            buzzer?.start()
+            return
+        }
+        val serviceTarea = TareaProgramadaService()
+        val serviceOf = OrdenFabricacionService()
+
+        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta, msg,0,this.idOperario))
+        val callOperaciones = serviceOf.buscarOperacionesPorPrepaqueteMaquina(msg, this.maquina?.codigoEtiqueta!!)
+
+        val idMaquina = this.maquina!!.id
+
+        callOperaciones.enqueue(object:Callback<List<OrdenFabricacionOperacion>>{
+            override fun onFailure(call: Call<List<OrdenFabricacionOperacion>>, t: Throwable) {
+                (frgLog as LogFragment).log("Error en la petición",false)
+                buzzer?.start()
+            }
+
+            override fun onResponse(
+                call: Call<List<OrdenFabricacionOperacion>>,
+                response: Response<List<OrdenFabricacionOperacion>>
+            ) {
+                if(response.body()!=null){
+                    when {
+                        response.body()!!.size == 1 -> callTarea.enqueue(object : Callback<List<Consumo>> {
+                            override fun onFailure(call: Call<List<Consumo>>, t: Throwable) {
+                                (frgLog as LogFragment).log("Error en la petición",false)
+                                buzzer?.start()
+                            }
+
+                            override fun onResponse(call: Call<List<Consumo>>, response: Response<List<Consumo>>) {
+                                if (response.body() != null) {
+                                    consumosRecibidos(idMaquina, response.body()!!)
+                                } else {
+                                    buzzer?.start()
+                                    (frgLog as LogFragment).log("Respuesta == null",false)                                }
+                            }
+
+                        })
+                        response.body()!!.size>1 -> {
+                            buzzerMultioperacion?.start()
+                            Dialogos.mostrarDialogoMultiOperacion(response.body()!!, ::consumirOperacion,msg, ctx!!)
+                        }
+                        else -> {
+                            buzzer?.start()
+                            (frgLog as LogFragment).log("Etiqueta no existente",false)
+                        }
+                    }
+                }
+            }
+
+        })
+
+
+    }
+
+    private fun consumirOperacion(operacion: OrdenFabricacionOperacion,codigoEtiqueta:String):Unit{
+
+        val serviceTarea = TareaProgramadaService()
+        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta,codigoEtiqueta, operacion.id, this.idOperario))
+        val idMaquina = this.maquina!!.id
+
+        callTarea.enqueue(object : Callback<List<Consumo>> {
+            override fun onFailure(call: Call<List<Consumo>>, t: Throwable) {
+                (frgLog as LogFragment).log("Error en la petición",false)
+                buzzer?.start()
+            }
+
+            override fun onResponse(call: Call<List<Consumo>>, response: Response<List<Consumo>>) {
+                if (response.body() != null) {
+                    consumosRecibidos(idMaquina, response.body()!!)
+                } else {
+                    buzzer?.start()
+                    Dialogos.mostrarDialogoInformacion("Respuesta == NULl", ctx!!)
+                }
+            }
+
+        })
+    }
+
+    /**
+     * busca una máquina mediante código de barras
+     * si la encuentra la mete en la lista
+     */
+    private fun findMaquina(cod: String) {
+        val service = MaquinaService()
+        val call = service.findMaquinaByCodigoEtiqueta(cod)
+        call.enqueue(object : Callback<Maquina> {
+            override fun onFailure(call: Call<Maquina>, t: Throwable) {
+                Dialogos.mostrarDialogoInformacion(t.message ?: "Error en la petición", ctx!!)
+            }
+
+            override fun onResponse(call: Call<Maquina>, response: Response<Maquina>) {
+                if (response.body() != null) {
+                    seleccionarMaquina(response.body()!!)
+                } else {
+                    log!!.log("RESPUESTA == NIL", false)
+                }
+            }
+
+        })
+    }
+
+    /**
+     * Añade a la maquina indicada lso consumos realizados
+     * Si hay algun consumo que acaba de terminar alguna tarea (talla)
+     * lo comunica con un buzzer y un mensaje en la barra de notificacion inferior
+     */
+    private fun consumosRecibidos(idMaquina: Int, consumos: List<Consumo>) {
+        if(consumos==null || consumos.isEmpty()){
+            buzzer?.start()
+            log!!.log("Lectura repetida", false)
+            return
+        }
+
+        var notificartarea = sharedPreferences?.getBoolean(NOTIFICAR_TAREA, true)!!
+        var notificarnota = sharedPreferences?.getBoolean(NOTIFICAR_NOTA, true)!!
+
+        val maq = maquinas.firstOrNull { x -> x.id == idMaquina }
+        var consumosTareasAcabadas = ArrayList<Consumo>()
+        var consumosNotasAcabadas = ArrayList<Consumo>()
+
+        for (consumo in consumos) {
+            MqttCliente.consumirTarea(consumo)
+            if(consumo.estado == 0 ||consumo.estado == 1){
+                consumosTareasAcabadas.add(consumo)
+            }
+            else if(consumo.estado == 3){
+                consumosNotasAcabadas.add(consumo)
+            }
+        }
+
+        if(consumosNotasAcabadas.size > 0){
+            buzzerNotaAcabada?.start()
+            if(notificarnota){
+                var notas = ""
+                for(c in consumosNotasAcabadas){
+                    notas+=c.codigoOrden+", "
+                }
+                Dialogos.mostrarDialogoInformacion("Has acabado las notas: $notas",ctx!!)
+            }
+        }
+        else if(consumosTareasAcabadas.size > 0){
+            buzzerTareaAcabada?.start()
+            if (notificartarea) {
+                Dialogos.mostrarDialogoTareasAcabadas(this, consumosTareasAcabadas)
+            }
+        }
+
+        log!!.log("OK", true)
+
+
+        for (consumo in consumos) {
+            if (consumo.cantidadPendienteAnterior != consumo.cantidadPendiente) {
+                maq?.consumos?.add(consumo)
+            }
+        }
+        adapter?.notifyDataSetChanged()
+    }
+
+    /**
+     * Lleva a la posicion superior la maquina seleccionada
+     * y le cambia el estado a isSeleccionada = true
+     */
+    private fun seleccionarMaquina(maq: Maquina) {
+        var maquinaExistente = this.maquinas.firstOrNull { x -> x.id.equals(maq.id) }
+
+        if (maquinaExistente != null) {
+            this.maquinas.remove(maquinaExistente)
+            this.maquina = maquinaExistente
+        } else {
+            this.maquina = maq
+        }
+
+        for (m in this.maquinas) {
+            m.isSeleccionada = false
+        }
+
+        this.maquina?.isSeleccionada = true
+        this.maquinas.add(0, this.maquina!!)
+
+
+        this.adapter?.notifyDataSetChanged()
+    }
+
+    override fun desconsumir(maq:Maquina){
+        for(consumo in maq.consumos){
+            val service = TareaProgramadaService()
+            val call = service.desconsumirEtiqueta(Desconsumo(consumo.codPrepaquete,consumo.idOperacion))
+            call.enqueue(object : Callback<Void> {
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    (frgLog as LogFragment).log("Error en la petición",false)
+                }
+
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if(response.isSuccessful){
+                        maq.consumos.remove(consumo)
+                        if(maq.consumos.isEmpty()){
+                            maquinas.remove(maq)
+                            adapter?.notifyDataSetChanged()
+                        }
+
+                        if (maquina != null && maquina!!.equals(maq)) {
+                            maquina = null
+                        }
+                    }
+                }
+
+            })
+        }
+    }
+
+    /**
+     * finaliza la actividad
+     */
+    fun atras(v: View) {
+        this.finish()
+    }
+
+    fun limpiar(v: View) {
+        this.maquina = null
+        this.maquinas.clear()
+        this.adapter?.notifyDataSetChanged()
+    }
+}
