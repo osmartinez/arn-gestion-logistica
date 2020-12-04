@@ -116,10 +116,12 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
                                 response.body()!!.size > 1 -> {
                                     data class Key(val codigo: String, val idOperacion: Int)
-                                    fun PrepaqueteSeccionDTO.toKey() = Key(this.codigo,this.idOperacion)
+
+                                    fun PrepaqueteSeccionDTO.toKey() =
+                                        Key(this.codigo, this.idOperacion)
 
                                     val gruposOf = response.body()!!.groupBy { it.codigo }
-                                    if(gruposOf.size==1){
+                                    if (gruposOf.size == 1) {
                                         // solo es 1 of multioperacion
                                         buzzerMultioperacion?.start()
                                         Dialogos.mostrarDialogoMultiOperacionAsociar(
@@ -127,16 +129,15 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                                             ::asociarPrepaquete,
                                             ctx!!
                                         )
-                                    }
-                                    else{
+                                    } else {
                                         // agrupacion
                                         var primerGrupo = gruposOf.toList().first()
-                                        var operaciones = primerGrupo.second.groupBy { it.idOperacion }
-                                        if(operaciones.size == 1){
+                                        var operaciones =
+                                            primerGrupo.second.groupBy { it.idOperacion }
+                                        if (operaciones.size == 1) {
                                             // agrupacion simple
                                             asociarPrepaquete(primerGrupo.second[0])
-                                        }
-                                        else{
+                                        } else {
                                             // agrupacion multiple
                                             buzzerMultioperacion?.start()
                                             Dialogos.mostrarDialogoMultiOperacionAsociar(
@@ -161,17 +162,22 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         }
     }
 
-    private fun asociarPrepaquete(prepaquete: PrepaqueteSeccionDTO){
+    private fun asociarPrepaquete(prepaquete: PrepaqueteSeccionDTO) {
         MqttCliente.asociarTarea(
-        maquina?.ipAutomata!!,
-        maquina?.posicion!!,
-        prepaquete.idTarea,
-        prepaquete.cantidadFabricar.toInt(),
-        prepaquete.codigo,
-        prepaquete.codUtillaje,
-        prepaquete.idUtillajeTalla,
-        prepaquete.tallas,
-        if (prepaquete.codigoAgrupacion == null) prepaquete.codigoEtiqueta else prepaquete.codigoAgrupacion)
+            maquina?.ipAutomata!!,
+            maquina?.posicion!!,
+            prepaquete.idTarea,
+            prepaquete.cantidadFabricar.toInt(),
+            prepaquete.codigo,
+            prepaquete.codUtillaje,
+            prepaquete.idUtillajeTalla,
+            prepaquete.tallas,
+            if (prepaquete.codigoAgrupacion == null) prepaquete.codigoEtiqueta else prepaquete.codigoAgrupacion,
+            prepaquete.idOrden,
+            prepaquete.idOperacion,
+            prepaquete.nombrecli,
+            prepaquete.codigoArticulo
+        )
     }
 
     /**

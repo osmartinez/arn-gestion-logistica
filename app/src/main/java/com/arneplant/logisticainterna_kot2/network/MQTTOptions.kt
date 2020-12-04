@@ -15,6 +15,10 @@ const val LEN_UTILLAJE = 25
 const val LEN_TALLAUTILLAJE=10
 const val LEN_TALLAARTICULO = 10
 const val LEN_ETIQUETA=13
+const val LEN_IDORDEN = 10
+const val LEN_IDOPERACION = 10
+const val LEN_CODIGOARTICULO = 20
+const val LEN_NOMBRECLIENTE=25
 
 const val SOLACE_CLIENT_USER_NAME = ""
 const val SOLACE_CLIENT_PASSWORD = ""

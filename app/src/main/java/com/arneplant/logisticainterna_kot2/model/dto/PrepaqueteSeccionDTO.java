@@ -3,6 +3,7 @@ package com.arneplant.logisticainterna_kot2.model.dto;
 import java.io.Serializable;
 
 public class PrepaqueteSeccionDTO implements Serializable {
+    private int IdOrden;
     private String Codigo;
     private String CodigoArticulo;
     private String DESCRIPCIONARTICULO;
@@ -20,6 +21,14 @@ public class PrepaqueteSeccionDTO implements Serializable {
     private String PedidoLinea;
     private int IdTarea;
     private int IdOperacion;
+
+    public int getIdOrden() {
+        return IdOrden;
+    }
+
+    public void setIdOrden(int idOrden) {
+        IdOrden = idOrden;
+    }
 
     public String getCodigo() {
         return Codigo;
