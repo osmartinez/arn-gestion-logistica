@@ -21,6 +21,15 @@ public class PrepaqueteSeccionDTO implements Serializable {
     private String PedidoLinea;
     private int IdTarea;
     private int IdOperacion;
+    private int Productividad;
+
+    public int getProductividad() {
+        return Productividad;
+    }
+
+    public void setProductividad(int productividad) {
+        Productividad = productividad;
+    }
 
     public int getIdOrden() {
         return IdOrden;

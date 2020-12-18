@@ -19,6 +19,7 @@ const val LEN_IDORDEN = 10
 const val LEN_IDOPERACION = 10
 const val LEN_CODIGOARTICULO = 20
 const val LEN_NOMBRECLIENTE=25
+const val LEN_PARESUTILLAJE = 3
 
 const val SOLACE_CLIENT_USER_NAME = ""
 const val SOLACE_CLIENT_PASSWORD = ""

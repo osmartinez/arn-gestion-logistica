@@ -163,6 +163,11 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
     }
 
     private fun asociarPrepaquete(prepaquete: PrepaqueteSeccionDTO) {
+        var nombreCliente = prepaquete.nombrecli
+        if(nombreCliente.length> 25){
+            nombreCliente = nombreCliente.substring(0,24);
+        }
+
         MqttCliente.asociarTarea(
             maquina?.ipAutomata!!,
             maquina?.posicion!!,
@@ -175,8 +180,9 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             if (prepaquete.codigoAgrupacion == null) prepaquete.codigoEtiqueta else prepaquete.codigoAgrupacion,
             prepaquete.idOrden,
             prepaquete.idOperacion,
-            prepaquete.nombrecli,
-            prepaquete.codigoArticulo
+            nombreCliente,
+            prepaquete.codigoArticulo,
+            prepaquete.productividad
         )
     }
 
