@@ -80,7 +80,8 @@
             android:text="Restaurar"
             android:autoText="true"
             android:padding="10dp"
-            android:backgroundTint="@color/red"
+            android:enabled="false"
+            android:backgroundTint="@color/grey"
             android:textStyle="bold"
             android:textColor="@color/white" />
 

@@ -15,6 +15,7 @@ import com.arneplant.logisticainterna_kot2.adapter.TareaProgramadaAdapter
 import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.*
+import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaEjecucion
 import com.arneplant.logisticainterna_kot2.model.dto.Consumo
 import com.arneplant.logisticainterna_kot2.model.dto.MaquinaEtiqueta
 import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
@@ -40,6 +41,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
     private var ctx: Context? = null
     private var buzzer: MediaPlayer? = null
     private var buzzerMultioperacion: MediaPlayer? = null
+    private var idOperario: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,8 +49,11 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         val sharedPref =
             this.getSharedPreferences("MEMORIA_INTERNA", Context.MODE_PRIVATE) ?: return
         val defaultValue = null
+        val defaultValueInt = 0
+
         val codigoOperario = sharedPref.getString("OPERARIO_CODIGO", defaultValue)
         val nombreOperario = sharedPref.getString("OPERARIO_NOMBRE", defaultValue)
+        idOperario = sharedPref.getInt("OPERARIO_ID", defaultValueInt)
 
         if (codigoOperario != null && nombreOperario != null) {
             this.title = "${codigoOperario} - Dejar en máquina"
@@ -112,6 +117,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                             when {
                                 response.body()!!.size == 1 -> {
                                     asociarPrepaquete(response.body()!![0])
+                                    asociarTareaEjecucion(response.body()!![0].idTarea.toString())
                                 }
 
                                 response.body()!!.size > 1 -> {
@@ -137,6 +143,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                                         if (operaciones.size == 1) {
                                             // agrupacion simple
                                             asociarPrepaquete(primerGrupo.second[0])
+                                            asociarTareaEjecucionAgrupacion(gruposOf)
                                         } else {
                                             // agrupacion multiple
                                             buzzerMultioperacion?.start()
@@ -162,10 +169,44 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         }
     }
 
+    private fun asociarTareaEjecucion(idsTareas: String){
+        var asignacion = AsignacionTareaEjecucion()
+        asignacion.idsTareas = idsTareas
+        asignacion.idMaquina = maquina?.id!!
+        val servicioMaquina = MaquinaService()
+        val call = servicioMaquina.asignarTareaEjecucion(asignacion)
+        call.enqueue(object:Callback<Void>{
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+
+            }
+
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+
+            }
+
+        })
+    }
+
+    private fun asociarTareaEjecucionAgrupacion (grupos: Map<String, List<PrepaqueteSeccionDTO>>){
+        var listaIdsTareas = HashSet<Int>()
+        for(grupo in grupos){
+            for(pre in grupo.value){
+                listaIdsTareas.add(pre.idTarea)
+            }
+        }
+        var idsTareas = ""
+        for(id in listaIdsTareas){
+            idsTareas+="${id},"
+        }
+        idsTareas = idsTareas.dropLast(1)
+
+        asociarTareaEjecucion(idsTareas)
+    }
+
     private fun asociarPrepaquete(prepaquete: PrepaqueteSeccionDTO) {
         var nombreCliente = prepaquete.nombrecli
         if(nombreCliente.length> 25){
-            nombreCliente = nombreCliente.substring(0,24);
+            nombreCliente = nombreCliente.substring(0,24)
         }
 
         MqttCliente.asociarTarea(
@@ -176,14 +217,31 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             prepaquete.codigo,
             prepaquete.codUtillaje,
             prepaquete.idUtillajeTalla,
-            prepaquete.tallas,
+            prepaquete.talla,
             if (prepaquete.codigoAgrupacion == null) prepaquete.codigoEtiqueta else prepaquete.codigoAgrupacion,
             prepaquete.idOrden,
             prepaquete.idOperacion,
             nombreCliente,
             prepaquete.codigoArticulo,
-            prepaquete.productividad
+            prepaquete.productividad,
+            idOperario
         )
+
+        tareas.clear()
+        val tarea = TareaPendiente()
+        tarea.codigoArticulo = prepaquete.codigoArticulo
+        tarea.idOfotc = prepaquete.idTarea
+        tarea.codigoOrden = prepaquete.codigo
+        tarea.idOrden = prepaquete.idOrden
+        tarea.nombreCliente = nombreCliente
+        tarea.modelo = prepaquete.descripcionarticulo
+        tarea.posicion = 0
+        tarea.paresFabricados = prepaquete.cantidadFabricada.toFloat()
+        tarea.paresFabricar = prepaquete.cantidadFabricar.toFloat()
+        tarea.utillaje = prepaquete.codUtillaje
+        tarea.tallaUtillaje = prepaquete.idUtillajeTalla
+        tareas.add(tarea)
+        adapter?.notifyDataSetChanged()
     }
 
     /**
@@ -206,7 +264,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             }
         })
 
-        obtenerTareasProgramadasMaquina(cod)
+        //obtenerTareasProgramadasMaquina(cod)
     }
 
     fun obtenerTareasProgramadasMaquina(codMaquina: String) {

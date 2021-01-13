@@ -14,8 +14,8 @@ object MqttCliente {
     }
 
 
-    fun asociarTarea(ipAutomata: String,numPrensa: Int, idTarea:Int, paresTarea: Int, codigoOF: String, utillaje:String,tallaUtillaje:String, tallaArticulo:String, codigoEtiqueta:String, idOrden: Int, idOperacion: Int, nombreCliente: String, codigoArticulo:String, paresUtillaje: Int){
-        val topic = "/moldeado/plc/${ipAutomata}/asociarTarea"
+    fun asociarTarea(ipAutomata: String,numPrensa: Int, idTarea:Int, paresTarea: Int, codigoOF: String, utillaje:String,tallaUtillaje:String, tallaArticulo:String, codigoEtiqueta:String, idOrden: Int, idOperacion: Int, nombreCliente: String, codigoArticulo:String, paresUtillaje: Int, idOperario: Int){
+        val topic = "/moldeado/plc/${ipAutomata.padStart(LEN_IPAUTOMATA)}/asociarTarea"
 
         val msg = "${numPrensa.toString().padStart(LEN_NUMPRENSA)};" +
                 "${idTarea.toString().padStart(LEN_IDTAREA,'0')};" +
@@ -29,7 +29,8 @@ object MqttCliente {
                 "${idOperacion.toString().padStart(LEN_IDOPERACION,'0')};" +
                 "${nombreCliente.padStart(LEN_NOMBRECLIENTE)};" +
                 "${codigoArticulo.padStart(LEN_CODIGOARTICULO)};" +
-                "${paresUtillaje.toString().padStart(LEN_PARESUTILLAJE)}"
+                "${paresUtillaje.toString().padStart(LEN_PARESUTILLAJE)};"+
+                "${idOperario.toString().padStart(LEN_IDOPERARIO)};"
 
         publicar(msg,topic)
     }
