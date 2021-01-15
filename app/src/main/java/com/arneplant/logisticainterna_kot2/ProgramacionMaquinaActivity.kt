@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import com.arneplant.logisticainterna_kot2.adapter.TareaProgramadaAdapter
 import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
+import com.arneplant.logisticainterna_kot2.delegate.DesprogramarDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
@@ -33,7 +34,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.HashMap
 
-class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
+class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate , DesprogramarDelegate{
+
 
     private var log: LogFragment? = null
     private var tareas : ArrayList<AgrupacionCola> = ArrayList()
@@ -213,7 +215,33 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
         programarColaMaquina(idsTareas, pres.first().agrupacion)
     }
 
+    override fun desprogramar(agrupacion: AgrupacionCola) {
+        tareas.clear()
+        adapter?.notifyDataSetChanged()
+        var idsTareas = ""
+        for(t in agrupacion.tareas){
+            idsTareas+="${t.idTarea},"
+        }
+        val asignacion = AsignacionTareaEjecucion(idsTareas,maquina?.id!!,agrupacion.agrupacion,0)
+        val service = MaquinaService()
+        val call = service.desasignarTareaEjecucion(asignacion)
+        call.enqueue(object: Callback<List<MaquinaColaTrabajo>>{
+            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
 
+            }
+
+            override fun onResponse(
+                call: Call<List<MaquinaColaTrabajo>>,
+                response: Response<List<MaquinaColaTrabajo>>
+            ) {
+                if(response.isSuccessful && response.body()!=null){
+                    tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
+                    adapter?.notifyDataSetChanged()
+                }
+            }
+
+        })
+    }
     private fun findMaquina(cod: String){
         val serviceMaquina = MaquinaService()
         val callMaquina = serviceMaquina.findMaquinaByCodigoEtiqueta(cod)

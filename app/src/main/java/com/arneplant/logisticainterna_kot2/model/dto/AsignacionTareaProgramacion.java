@@ -9,7 +9,7 @@ public class AsignacionTareaProgramacion {
     public AsignacionTareaProgramacion(String idsTareas, int idMaquina, int agrupacion, int idOperarioPrograma) {
         this.idsTareas = idsTareas;
         this.idMaquina = idMaquina;
-        this.agrupacion = idOperarioPrograma;
+        this.agrupacion = agrupacion;
         this.idOperarioPrograma = idOperarioPrograma;
     }
 

@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
 import com.arneplant.logisticainterna_kot2.R
+import com.arneplant.logisticainterna_kot2.delegate.DesprogramarDelegate
+import com.arneplant.logisticainterna_kot2.delegate.RestaurarConsumosDelegate
 import com.arneplant.logisticainterna_kot2.model.TareaPendiente
 import com.arneplant.logisticainterna_kot2.model.UbicacionPaquetes
 import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionCola
@@ -16,6 +18,7 @@ import kotlinx.android.synthetic.main.entry_ubicacion_paquetes.view.*
 class TareaProgramadaAdapter (private val context: Context,
                         private val dataSource:List<AgrupacionCola>): BaseAdapter() {
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private var delegate: DesprogramarDelegate? =null
 
     private var views: ArrayList<View> = ArrayList(dataSource.size)
 
@@ -46,6 +49,14 @@ class TareaProgramadaAdapter (private val context: Context,
         rowView.tbTitulo.text = item.toString()
         rowView.tbCliente.text = item.nombreCliente
         rowView.tbModelo.text = item.modelo
+
+        if(context is DesprogramarDelegate){
+            delegate = context
+        }
+        rowView.btEliminar.setOnClickListener {
+            delegate?.desprogramar(item)
+        }
+
         //rowView.tbParesPendientes.text = "${item.cantidadPendiente} pares pendientes"
         if(item.isEjecucion){
             rowView.tbTitulo.setBackgroundColor(ContextCompat.getColor(context, R.color.green))

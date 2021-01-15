@@ -86,7 +86,6 @@
             android:text="Quitar"
             android:autoText="true"
             android:padding="10dp"
-            android:enabled="false"
             android:backgroundTint="@color/red"
             android:textStyle="bold"
             android:textColor="@color/white" />

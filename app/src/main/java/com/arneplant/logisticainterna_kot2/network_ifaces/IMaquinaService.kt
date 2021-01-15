@@ -14,6 +14,11 @@ interface IMaquinaService {
     @POST("api/maquinas/asignarTareaEjecucion")
     fun asignarTareaEjecucion(@Body asginacion: AsignacionTareaEjecucion): Call<List<MaquinaColaTrabajo>>
 
+
+    @POST("api/maquinas/desasignarTareaEjecucion")
+    fun desasignarTareaEjecucion(@Body asginacion: AsignacionTareaEjecucion): Call<List<MaquinaColaTrabajo>>
+
+
     @POST("api/maquinas/programarTareaCola")
     fun programarTareaCola(@Body asginacion: AsignacionTareaProgramacion): Call<List<MaquinaColaTrabajo>>
 
