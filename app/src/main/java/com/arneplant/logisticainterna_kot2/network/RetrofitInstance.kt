@@ -8,7 +8,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 class RetrofitInstance {
     companion object {
         //private val BASE_URL = "http://192.168.0.29:8080/RESTful4/webresources/"
-        private val BASE_URL = "http://192.168.0.104:3000/"
+        private val BASE_URL = "http://192.168.0.109:3000/"
         private var retrofit: Retrofit? = null
         val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create()
 

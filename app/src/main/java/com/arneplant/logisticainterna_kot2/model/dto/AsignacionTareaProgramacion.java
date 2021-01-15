@@ -1,27 +1,27 @@
 package com.arneplant.logisticainterna_kot2.model.dto;
 
-public class AsignacionTareaEjecucion {
+public class AsignacionTareaProgramacion {
     private String idsTareas;
     private int idMaquina;
     private int agrupacion;
-    private int idOperarioEjecucion;
+    private int idOperarioPrograma;
 
-    public AsignacionTareaEjecucion(String idsTareas, int idMaquina, int agrupacion, int idOperarioEjecucion) {
+    public AsignacionTareaProgramacion(String idsTareas, int idMaquina, int agrupacion, int idOperarioPrograma) {
         this.idsTareas = idsTareas;
         this.idMaquina = idMaquina;
-        this.agrupacion = agrupacion;
-        this.idOperarioEjecucion = idOperarioEjecucion;
+        this.agrupacion = idOperarioPrograma;
+        this.idOperarioPrograma = idOperarioPrograma;
     }
 
-    public AsignacionTareaEjecucion() {
+    public AsignacionTareaProgramacion() {
     }
 
-    public int getIdOperarioEjecucion() {
-        return idOperarioEjecucion;
+    public int getIdOperarioPrograma() {
+        return idOperarioPrograma;
     }
 
-    public void setIdOperarioEjecucion(int idOperarioEjecucion) {
-        this.idOperarioEjecucion = idOperarioEjecucion;
+    public void setIdOperarioPrograma(int idOperarioEjecucion) {
+        this.idOperarioPrograma = idOperarioEjecucion;
     }
 
     public int getAgrupacion() {

@@ -116,11 +116,13 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                         if (response.body() != null) {
                             when {
                                 response.body()!!.size == 1 -> {
+                                    // 1 operacion 1 of
                                     asociarPrepaquete(response.body()!![0])
-                                    asociarTareaEjecucion(response.body()!![0].idTarea.toString())
+                                    asociarTareaEjecucion(response.body()!![0].idTarea.toString(),0)
                                 }
 
                                 response.body()!!.size > 1 -> {
+                                    // multioperacion
                                     data class Key(val codigo: String, val idOperacion: Int)
 
                                     fun PrepaqueteSeccionDTO.toKey() =
@@ -128,7 +130,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
                                     val gruposOf = response.body()!!.groupBy { it.codigo }
                                     if (gruposOf.size == 1) {
-                                        // solo es 1 of multioperacion
+                                        // multioperacion 1 of
                                         buzzerMultioperacion?.start()
                                         Dialogos.mostrarDialogoMultiOperacionAsociar(
                                             gruposOf.toList().first().second,
@@ -136,7 +138,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                                             ctx!!
                                         )
                                     } else {
-                                        // agrupacion
+                                        // multioperacion agrupacion
                                         var primerGrupo = gruposOf.toList().first()
                                         var operaciones =
                                             primerGrupo.second.groupBy { it.idOperacion }
@@ -169,29 +171,32 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         }
     }
 
-    private fun asociarTareaEjecucion(idsTareas: String){
-        var asignacion = AsignacionTareaEjecucion()
-        asignacion.idsTareas = idsTareas
-        asignacion.idMaquina = maquina?.id!!
+    private fun asociarTareaEjecucion(idsTareas: String, agrupacion: Int){
+        var asignacion = AsignacionTareaEjecucion(idsTareas,maquina?.id!!,agrupacion,idOperario)
         val servicioMaquina = MaquinaService()
         val call = servicioMaquina.asignarTareaEjecucion(asignacion)
-        call.enqueue(object:Callback<Void>{
-            override fun onFailure(call: Call<Void>, t: Throwable) {
+        call.enqueue(object:Callback<List<MaquinaColaTrabajo>>{
+            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
 
             }
 
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-
+            override fun onResponse(call: Call<List<MaquinaColaTrabajo>>, response: Response<List<MaquinaColaTrabajo>>) {
+                if(response.isSuccessful){
+                    var cola = response.body()!!
+                    MqttCliente.colaMaquinaActualizada(cola)
+                }
             }
 
         })
     }
 
     private fun asociarTareaEjecucionAgrupacion (grupos: Map<String, List<PrepaqueteSeccionDTO>>){
+        var agrupacion = 0
         var listaIdsTareas = HashSet<Int>()
         for(grupo in grupos){
             for(pre in grupo.value){
                 listaIdsTareas.add(pre.idTarea)
+                agrupacion = pre.agrupacion
             }
         }
         var idsTareas = ""
@@ -200,7 +205,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         }
         idsTareas = idsTareas.dropLast(1)
 
-        asociarTareaEjecucion(idsTareas)
+        asociarTareaEjecucion(idsTareas,agrupacion)
     }
 
     private fun asociarPrepaquete(prepaquete: PrepaqueteSeccionDTO) {

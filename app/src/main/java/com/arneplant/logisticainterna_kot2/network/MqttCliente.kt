@@ -2,8 +2,12 @@ package com.arneplant.logisticainterna_kot2.network
 
 import android.content.Context
 import android.util.Log
+import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
 import com.arneplant.logisticainterna_kot2.model.dto.Consumo
+import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
+import com.google.gson.Gson
+import org.json.JSONArray
 
 object MqttCliente {
 
@@ -13,6 +17,12 @@ object MqttCliente {
         this.cliente = MqttClientHelper(ctx,operario)
     }
 
+
+    fun colaMaquinaActualizada(cola :List<MaquinaColaTrabajo>){
+        val topic = "/maquina/programacion"
+        val msg = Gson().toJson(cola)
+        publicar(msg,topic)
+    }
 
     fun asociarTarea(ipAutomata: String,numPrensa: Int, idTarea:Int, paresTarea: Int, codigoOF: String, utillaje:String,tallaUtillaje:String, tallaArticulo:String, codigoEtiqueta:String, idOrden: Int, idOperacion: Int, nombreCliente: String, codigoArticulo:String, paresUtillaje: Int, idOperario: Int){
         val topic = "/moldeado/plc/${ipAutomata.padStart(LEN_IPAUTOMATA)}/asociarTarea"

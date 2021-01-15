@@ -1,13 +1,19 @@
 package com.arneplant.logisticainterna_kot2.network_implementation
 
 import com.arneplant.logisticainterna_kot2.model.Maquina
+import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
 import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaEjecucion
+import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaProgramacion
 import com.arneplant.logisticainterna_kot2.network.RetrofitInstance
 import com.arneplant.logisticainterna_kot2.network_ifaces.IMaquinaService
 import retrofit2.Call
 
 class MaquinaService:IMaquinaService {
-    override fun asignarTareaEjecucion(asginacion: AsignacionTareaEjecucion): Call<Void> {
+    override fun programarTareaCola(asginacion: AsignacionTareaProgramacion): Call<List<MaquinaColaTrabajo>> {
+        return service.programarTareaCola(asginacion)
+    }
+
+    override fun asignarTareaEjecucion(asginacion: AsignacionTareaEjecucion): Call<List<MaquinaColaTrabajo>> {
         return service.asignarTareaEjecucion(asginacion)
     }
 

@@ -58,7 +58,7 @@
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:onClick="verProgramacion"
-                android:text="VER PLAN&#10;MÁQUINA"
+                android:text="PLAN&#10;MÁQUINA"
                 android:textColor="@color/white"
                 android:textSize="30sp" />
         </TableRow>

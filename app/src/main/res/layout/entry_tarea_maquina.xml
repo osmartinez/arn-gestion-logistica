@@ -37,13 +37,18 @@
             android:layout_alignParentEnd="false"
             android:layout_alignParentRight="false"/>
 
-        <TextView
-            android:id="@+id/tbFechaFin"
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btSubir"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:text="ACABA DENTRO DE 10 HORAS" />
+            android:text="Subir"
+            android:autoText="true"
+            android:padding="10dp"
+            android:backgroundTint="@color/green"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
 
     </RelativeLayout>
     <RelativeLayout
@@ -54,29 +59,32 @@
         android:id="@+id/panel2"
         android:background="@color/lightBlue">
 
-        <TextView
-            android:id="@+id/tbParesPendientes"
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btEliminar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/btRestaurar"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="5dp"
-            android:padding="10sp"
-            android:text="0 PARES PENDIENTES"
-            android:textSize="14sp" />
+            android:layout_marginRight="100dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="Quitar"
+            android:autoText="true"
+            android:padding="10dp"
+            android:enabled="false"
+            android:backgroundTint="@color/red"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
 
         <info.hoang8f.widget.FButton
-            android:id="@+id/btRestaurar"
+            android:id="@+id/btBajar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:text="Modificar"
+            android:text="Bajar"
             android:autoText="true"
-            android:background="@color/grey"
             android:padding="10dp"
             android:enabled="false"
-            android:backgroundTint="@color/grey"
+            android:backgroundTint="@color/green"
             android:textStyle="bold"
             android:textColor="@color/white" />
 

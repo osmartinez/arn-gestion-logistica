@@ -22,6 +22,15 @@ public class PrepaqueteSeccionDTO implements Serializable {
     private int IdTarea;
     private int IdOperacion;
     private int Productividad;
+    private Integer Agrupacion;
+
+    public Integer getAgrupacion() {
+        return Agrupacion;
+    }
+
+    public void setAgrupacion(Integer agrupacion) {
+        Agrupacion = agrupacion;
+    }
 
     public int getProductividad() {
         return Productividad;

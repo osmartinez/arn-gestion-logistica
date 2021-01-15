@@ -44,7 +44,7 @@ class TareaProgramadaAdapter (private val context: Context,
         var item = getItem(position) as TareaPendiente
         rowView.tbTitulo.text = item.toString()
         rowView.tbCliente.text = item.nombreCliente
-        rowView.tbParesPendientes.text = "${item.cantidadPendiente} pares pendientes"
+        //rowView.tbParesPendientes.text = "${item.cantidadPendiente} pares pendientes"
         if(item.isNuevo){
             rowView.tbTitulo.setBackgroundColor(ContextCompat.getColor(context, R.color.green))
             rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))

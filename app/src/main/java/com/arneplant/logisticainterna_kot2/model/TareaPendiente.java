@@ -24,6 +24,7 @@ public class TareaPendiente implements Serializable {
     private int IdOfotc;
     private int Posicion;
     private int IdMaquina;
+    private int Agrupacion;
     private boolean Nrocesado;
     private boolean nuevo;
 
@@ -198,6 +199,14 @@ public class TareaPendiente implements Serializable {
 
     public void setNuevo(boolean nuevo) {
         this.nuevo = nuevo;
+    }
+
+    public int getAgrupacion() {
+        return Agrupacion;
+    }
+
+    public void setAgrupacion(int agrupacion) {
+        Agrupacion = agrupacion;
     }
 
     @NonNull
