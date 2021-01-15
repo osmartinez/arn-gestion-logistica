@@ -9,6 +9,60 @@ public class MaquinaColaTrabajo {
     private boolean Ejecucion;
     private Integer IdOperarioEjecuta;
     private Integer IdOperarioPrograma;
+    private String NombreCliente;
+    private String CodigoOrden;
+    private float CantidadFabricar;
+    private String Utillaje;
+    private String TallaUtillaje;
+    private String Modelo;
+
+    public String getModelo() {
+        return Modelo;
+    }
+
+    public void setModelo(String modelo) {
+        Modelo = modelo;
+    }
+
+    public String getNombreCliente() {
+        return NombreCliente;
+    }
+
+    public void setNombreCliente(String nombreCliente) {
+        NombreCliente = nombreCliente;
+    }
+
+    public String getUtillaje() {
+        return Utillaje;
+    }
+
+    public void setUtillaje(String utillaje) {
+        Utillaje = utillaje;
+    }
+
+    public String getTallaUtillaje() {
+        return TallaUtillaje;
+    }
+
+    public void setTallaUtillaje(String tallaUtillaje) {
+        TallaUtillaje = tallaUtillaje;
+    }
+
+    public String getCodigoOrden() {
+        return CodigoOrden;
+    }
+
+    public void setCodigoOrden(String codigoOrden) {
+        CodigoOrden = codigoOrden;
+    }
+
+    public float getCantidadFabricar() {
+        return CantidadFabricar;
+    }
+
+    public void setCantidadFabricar(float cantidadFabricar) {
+        CantidadFabricar = cantidadFabricar;
+    }
 
     public int getId() {
         return Id;

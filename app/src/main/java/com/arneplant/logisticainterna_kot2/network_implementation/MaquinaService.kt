@@ -9,6 +9,14 @@ import com.arneplant.logisticainterna_kot2.network_ifaces.IMaquinaService
 import retrofit2.Call
 
 class MaquinaService:IMaquinaService {
+    override fun verColaTrabajoPorCodigo(codigoEtiqueta: String): Call<List<MaquinaColaTrabajo>> {
+        return service.verColaTrabajoPorCodigo(codigoEtiqueta)
+    }
+
+    override fun verColaTrabajoPorId(idMaquina: Int): Call<List<MaquinaColaTrabajo>> {
+        return service.verColaTrabajoPorId(idMaquina)
+    }
+
     override fun programarTareaCola(asginacion: AsignacionTareaProgramacion): Call<List<MaquinaColaTrabajo>> {
         return service.programarTareaCola(asginacion)
     }

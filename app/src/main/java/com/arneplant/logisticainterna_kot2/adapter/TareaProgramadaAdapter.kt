@@ -9,11 +9,12 @@ import androidx.core.content.ContextCompat
 import com.arneplant.logisticainterna_kot2.R
 import com.arneplant.logisticainterna_kot2.model.TareaPendiente
 import com.arneplant.logisticainterna_kot2.model.UbicacionPaquetes
+import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionCola
 import kotlinx.android.synthetic.main.entry_tarea_maquina.view.*
 import kotlinx.android.synthetic.main.entry_ubicacion_paquetes.view.*
 
 class TareaProgramadaAdapter (private val context: Context,
-                        private val dataSource:List<TareaPendiente>): BaseAdapter() {
+                        private val dataSource:List<AgrupacionCola>): BaseAdapter() {
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     private var views: ArrayList<View> = ArrayList(dataSource.size)
@@ -41,11 +42,12 @@ class TareaProgramadaAdapter (private val context: Context,
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val rowView = inflater.inflate(R.layout.entry_tarea_maquina, parent, false)
         this.views.add(position,rowView)
-        var item = getItem(position) as TareaPendiente
+        var item = getItem(position) as AgrupacionCola
         rowView.tbTitulo.text = item.toString()
         rowView.tbCliente.text = item.nombreCliente
+        rowView.tbModelo.text = item.modelo
         //rowView.tbParesPendientes.text = "${item.cantidadPendiente} pares pendientes"
-        if(item.isNuevo){
+        if(item.isEjecucion){
             rowView.tbTitulo.setBackgroundColor(ContextCompat.getColor(context, R.color.green))
             rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
             rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))

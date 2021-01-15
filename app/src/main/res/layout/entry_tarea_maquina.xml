@@ -32,7 +32,9 @@
             android:layout_alignParentLeft="true"
             android:padding="10sp"
             android:text="CLIENTE S.A."
-            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:textFontWeight="bold"
+            android:textSize="20sp"
             android:layout_alignParentStart="false"
             android:layout_alignParentEnd="false"
             android:layout_alignParentRight="false"/>
@@ -58,6 +60,21 @@
         android:padding="5dp"
         android:id="@+id/panel2"
         android:background="@color/lightBlue">
+
+        <TextView
+            android:id="@+id/tbModelo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:padding="10sp"
+            android:text="MODELO"
+            android:textColor="@color/white"
+            android:textFontWeight="bold"
+            android:layout_marginRight="100dp"
+            android:textSize="14sp"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"/>
 
         <info.hoang8f.widget.FButton
             android:id="@+id/btEliminar"

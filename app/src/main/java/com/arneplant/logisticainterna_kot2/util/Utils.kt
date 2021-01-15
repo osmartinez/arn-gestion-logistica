@@ -1,5 +1,9 @@
 package com.arneplant.logisticainterna_kot2.util
 
+import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
+import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionCola
+import java.util.HashMap
+
 object Utils {
     fun getTipo(cod: String): Tipo {
         return if (cod.startsWith("01")) {
@@ -27,5 +31,49 @@ object Utils {
         } else {
             Tipo.None
         }
+    }
+
+    fun agruparColaTrabajo(cola: List<MaquinaColaTrabajo>):ArrayList<AgrupacionCola> {
+        var tareas : ArrayList<AgrupacionCola> = ArrayList()
+        val mapa = HashMap<Int, ArrayList<MaquinaColaTrabajo>>()
+        for (tarea in cola) {
+            if (!mapa.containsKey(tarea.agrupacion)) {
+                val list = java.util.ArrayList<MaquinaColaTrabajo>()
+                list.add(tarea)
+                mapa[tarea.agrupacion] = list
+            } else {
+                mapa[tarea.agrupacion]!!.add(tarea)
+            }
+        }
+
+        for(par in mapa){
+            if(par.key!=0){
+                tareas.add(AgrupacionCola(par.value))
+            }
+            else{
+                for(tarea in par.value){
+                    val listaUnica = ArrayList<MaquinaColaTrabajo>()
+                    listaUnica.add(tarea)
+                    tareas.add(AgrupacionCola(listaUnica))
+                }
+            }
+        }
+
+        tareas.sortBy { x->x.posicion }
+        return tareas
+    }
+
+    fun shortNombreCliente(cliente: String):String{
+        if(cliente.length>20){
+            return cliente.take(20)
+        }
+        return cliente
+    }
+
+    fun shortModelo(modelo: String):String{
+        if(modelo.length>17){
+            return modelo.take(17)
+        }
+        return modelo
     }
 }

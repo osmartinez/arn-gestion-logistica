@@ -15,10 +15,7 @@ import com.arneplant.logisticainterna_kot2.adapter.TareaProgramadaAdapter
 import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.*
-import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaEjecucion
-import com.arneplant.logisticainterna_kot2.model.dto.Consumo
-import com.arneplant.logisticainterna_kot2.model.dto.MaquinaEtiqueta
-import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
+import com.arneplant.logisticainterna_kot2.model.dto.*
 import com.arneplant.logisticainterna_kot2.network.MqttCliente
 import com.arneplant.logisticainterna_kot2.network_implementation.*
 import com.arneplant.logisticainterna_kot2.util.Dialogos
@@ -35,7 +32,7 @@ import retrofit2.Response
 
 class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
     var adapter: TareaProgramadaAdapter? = null
-    var tareas: ArrayList<TareaPendiente> = ArrayList()
+    var tareas: ArrayList<AgrupacionCola> = ArrayList()
     private var log: LogFragment? = null
     private var maquina: Maquina? = null
     private var ctx: Context? = null
@@ -75,6 +72,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         when (Utils.getTipo(msg)) {
             Tipo.Maquina -> {
                 findMaquina(msg)
+                obtenerProgramacionMaquina(msg)
             }
             Tipo.PrePaquete -> {
                 //intentarAsociar(msg, 0)
@@ -172,6 +170,8 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
     }
 
     private fun asociarTareaEjecucion(idsTareas: String, agrupacion: Int){
+        tareas.clear()
+        adapter?.notifyDataSetChanged()
         var asignacion = AsignacionTareaEjecucion(idsTareas,maquina?.id!!,agrupacion,idOperario)
         val servicioMaquina = MaquinaService()
         val call = servicioMaquina.asignarTareaEjecucion(asignacion)
@@ -184,6 +184,8 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                 if(response.isSuccessful){
                     var cola = response.body()!!
                     MqttCliente.colaMaquinaActualizada(cola)
+                    tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
+                    adapter?.notifyDataSetChanged()
                 }
             }
 
@@ -232,21 +234,6 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             idOperario
         )
 
-        tareas.clear()
-        val tarea = TareaPendiente()
-        tarea.codigoArticulo = prepaquete.codigoArticulo
-        tarea.idOfotc = prepaquete.idTarea
-        tarea.codigoOrden = prepaquete.codigo
-        tarea.idOrden = prepaquete.idOrden
-        tarea.nombreCliente = nombreCliente
-        tarea.modelo = prepaquete.descripcionarticulo
-        tarea.posicion = 0
-        tarea.paresFabricados = prepaquete.cantidadFabricada.toFloat()
-        tarea.paresFabricar = prepaquete.cantidadFabricar.toFloat()
-        tarea.utillaje = prepaquete.codUtillaje
-        tarea.tallaUtillaje = prepaquete.idUtillajeTalla
-        tareas.add(tarea)
-        adapter?.notifyDataSetChanged()
     }
 
     /**
@@ -254,6 +241,8 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
      * en dicha máquina
      */
     private fun findMaquina(cod: String) {
+        tareas.clear()
+        adapter?.notifyDataSetChanged()
         val serviceMaquina = MaquinaService()
         val callMaquina = serviceMaquina.findMaquinaByCodigoEtiqueta(cod)
         callMaquina.enqueue(object : Callback<Maquina> {
@@ -269,26 +258,25 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             }
         })
 
-        //obtenerTareasProgramadasMaquina(cod)
     }
 
-    fun obtenerTareasProgramadasMaquina(codMaquina: String) {
-        val service = TareaProgramadaService()
-        val call = service.listarTareasMaquina(codMaquina)
-        call.enqueue(object : Callback<List<TareaPendiente>> {
-            override fun onFailure(call: Call<List<TareaPendiente>>, t: Throwable) {
+    fun obtenerProgramacionMaquina(codMaquina: String) {
+        tareas.clear()
+        adapter?.notifyDataSetChanged()
+        val service = MaquinaService()
+        val call = service.verColaTrabajoPorCodigo(codMaquina)
+        call.enqueue(object : Callback<List<MaquinaColaTrabajo>> {
+            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
                 Dialogos.mostrarDialogoInformacion(t.message ?: "Error en la petición", ctx!!)
-                tareas.clear()
-                adapter?.notifyDataSetChanged()
+
             }
 
             override fun onResponse(
-                call: Call<List<TareaPendiente>>,
-                response: Response<List<TareaPendiente>>
+                call: Call<List<MaquinaColaTrabajo>>,
+                response: Response<List<MaquinaColaTrabajo>>
             ) {
-                if (response.body() != null) {
-                    tareas.clear()
-                    tareas.addAll(response.body()!!)
+                if (response.isSuccessful && response.body() != null) {
+                   tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
                     adapter?.notifyDataSetChanged()
                 }
             }

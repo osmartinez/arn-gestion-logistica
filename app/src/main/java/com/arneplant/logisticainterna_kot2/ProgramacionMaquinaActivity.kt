@@ -12,6 +12,7 @@ import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
 import com.arneplant.logisticainterna_kot2.model.TareaPendiente
+import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionCola
 import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaEjecucion
 import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaProgramacion
 import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
@@ -30,11 +31,12 @@ import kotlinx.android.synthetic.main.activity_programacion_maquina.lista
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.HashMap
 
 class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
     private var log: LogFragment? = null
-    private var tareas : ArrayList<TareaPendiente> = ArrayList()
+    private var tareas : ArrayList<AgrupacionCola> = ArrayList()
     private var adapter: TareaProgramadaAdapter?  = null
     private var maquina: Maquina? = null
     private var ctx: Context? = null
@@ -76,6 +78,7 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
         when (Utils.getTipo(msg)) {
             Tipo.Maquina -> {
                 findMaquina(msg) // carga - descarga
+                findProgramacionMaquina(msg)
             }
             Tipo.PrePaquete -> {
                 //intentarAsociar(msg, 0)
@@ -176,6 +179,8 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
     }
 
     private fun programarColaMaquina(idsTareas: String, agrupacion: Int){
+        tareas.clear()
+        adapter?.notifyDataSetChanged()
         var asignacion = AsignacionTareaProgramacion(idsTareas,maquina?.id!!,agrupacion,idOperario)
         val servicioMaquina = MaquinaService()
         val call = servicioMaquina.programarTareaCola(asignacion)
@@ -188,6 +193,8 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                 if(response.isSuccessful){
                     var cola = response.body()!!
                     MqttCliente.colaMaquinaActualizada(cola)
+                    tareas.addAll(Utils.agruparColaTrabajo(cola))
+                    adapter?.notifyDataSetChanged()
                 }
             }
 
@@ -222,30 +229,30 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                     title = response.body()!!.nombre
                     maquina = response.body()
 
-                    findProgramacionMaquina()
                 }
             }
 
         })
     }
 
-    private fun findProgramacionMaquina(){
-        val service = TareaProgramadaService()
-        val call = service.listarTareasMaquina(this.maquina?.codigoEtiqueta!!)
-        call.enqueue(object: Callback<List<TareaPendiente>> {
-            override fun onFailure(call: Call<List<TareaPendiente>>, t: Throwable) {
+    private fun findProgramacionMaquina(cod: String){
+        tareas.clear()
+        adapter?.notifyDataSetChanged()
+
+        val service = MaquinaService()
+        val call = service.verColaTrabajoPorCodigo(cod)
+        call.enqueue(object: Callback<List<MaquinaColaTrabajo>> {
+            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
                 log!!.log(t.message ?: "Error en la petición", false)
-                tareas.clear()
-                adapter?.notifyDataSetChanged()
+
             }
 
             override fun onResponse(
-                call: Call<List<TareaPendiente>>,
-                response: Response<List<TareaPendiente>>
+                call: Call<List<MaquinaColaTrabajo>>,
+                response: Response<List<MaquinaColaTrabajo>>
             ) {
-                if(response.body()!=null){
-                    tareas.clear()
-                    tareas.addAll(response.body()!!)
+                if(response.isSuccessful && response.body()!=null){
+                    tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
                     adapter?.notifyDataSetChanged()
                 }
             }

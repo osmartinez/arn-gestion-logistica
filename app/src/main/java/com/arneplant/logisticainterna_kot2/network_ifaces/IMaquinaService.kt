@@ -5,10 +5,7 @@ import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
 import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaEjecucion
 import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaProgramacion
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface IMaquinaService {
     @GET("api/maquinas/{codigoMaquina}")
@@ -19,4 +16,11 @@ interface IMaquinaService {
 
     @POST("api/maquinas/programarTareaCola")
     fun programarTareaCola(@Body asginacion: AsignacionTareaProgramacion): Call<List<MaquinaColaTrabajo>>
+
+
+    @GET("api/maquinas/colaTrabajo/verPorId")
+    fun verColaTrabajoPorId(@Query("idMaquina") idMaquina:Int): Call<List<MaquinaColaTrabajo>>
+
+    @GET("api/maquinas/colaTrabajo/verPorCodigo")
+    fun verColaTrabajoPorCodigo(@Query("codigoEtiqueta") codigoEtiqueta: String): Call<List<MaquinaColaTrabajo>>
 }
