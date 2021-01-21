@@ -183,7 +183,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             override fun onResponse(call: Call<List<MaquinaColaTrabajo>>, response: Response<List<MaquinaColaTrabajo>>) {
                 if(response.isSuccessful){
                     var cola = response.body()!!
-                    MqttCliente.colaMaquinaActualizada(cola)
+                    MqttCliente.colaMaquinaActualizada(maquina!!,cola,ArrayList())
                     tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
                     adapter?.notifyDataSetChanged()
                 }

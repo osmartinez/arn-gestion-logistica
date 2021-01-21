@@ -27,7 +27,7 @@ public class Maquina implements Serializable {
     private String CorrectorCapacidad = null;
     private String CodUbicacion;
     private String CodigoEtiqueta;
-    private float IdBancada;
+    private Integer IdBancada;
     private List<Consumo> consumos;
     private boolean seleccionada;
     private String IpAutomata = null;
@@ -173,11 +173,11 @@ public class Maquina implements Serializable {
         CodigoEtiqueta = codigoEtiqueta;
     }
 
-    public float getIdBancada() {
+    public Integer getIdBancada() {
         return IdBancada;
     }
 
-    public void setIdBancada(float idBancada) {
+    public void setIdBancada(Integer idBancada) {
         IdBancada = idBancada;
     }
 

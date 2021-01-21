@@ -14,7 +14,7 @@ class MqttClientHelper(context: Context?,operario: String) {
 
     var mqttAndroidClient: MqttAndroidClient
     val serverUri = SOLACE_MQTT_HOST
-    private val clientId: String = "${Settings.Secure.getString(context?.getContentResolver(), "bluetooth_name")}_${operario}";
+    private val clientId: String = "${Settings.Secure.getString(context?.getContentResolver(), "bluetooth_name")}_${operario}"
 
     fun setCallback(callback: MqttCallbackExtended?) {
         mqttAndroidClient.setCallback(callback)
@@ -75,7 +75,7 @@ class MqttClientHelper(context: Context?,operario: String) {
         }
     }
 
-    fun subscribe(subscriptionTopic: String, qos: Int = 0) {
+    fun subscribe(subscriptionTopic: String, qos: Int = 2) {
         try {
             mqttAndroidClient.subscribe(subscriptionTopic, qos, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken) {
@@ -96,7 +96,7 @@ class MqttClientHelper(context: Context?,operario: String) {
         }
     }
 
-    fun publish(topic: String, msg: String, qos: Int = 0) {
+    fun publish(topic: String, msg: String, qos: Int = 2) {
         try {
             val message = MqttMessage()
             message.payload = msg.toByteArray()

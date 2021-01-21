@@ -13,6 +13,11 @@
     <color name="lightBlue">#69c9ff</color>
     <color name="transparent">#88000000</color>
     <color name="orange">#FFA500</color>
+    <color name="dark_orange">#C98200</color>
+
     <color name="black">#000000</color>
+    <color name="violet">#EE82EE</color>
+    <color name="dark_violet">#BC69BC</color>
+
 
 </resources>

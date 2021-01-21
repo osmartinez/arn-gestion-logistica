@@ -59,14 +59,14 @@ class TareaProgramadaAdapter (private val context: Context,
 
         //rowView.tbParesPendientes.text = "${item.cantidadPendiente} pares pendientes"
         if(item.isEjecucion){
-            rowView.tbTitulo.setBackgroundColor(ContextCompat.getColor(context, R.color.green))
-            rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
-            rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
+            rowView.tbTitulo.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_violet))
+            rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
+            rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
         }
         else{
-            rowView.tbTitulo.setBackgroundColor(ContextCompat.getColor(context, R.color.purple))
-            rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.lightBlue))
-            rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.lightBlue))
+            rowView.tbTitulo.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_orange))
+            rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
+            rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
         }
         return rowView
     }

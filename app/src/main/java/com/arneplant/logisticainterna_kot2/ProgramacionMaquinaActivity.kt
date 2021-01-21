@@ -194,7 +194,7 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
             override fun onResponse(call: Call<List<MaquinaColaTrabajo>>, response: Response<List<MaquinaColaTrabajo>>) {
                 if(response.isSuccessful){
                     var cola = response.body()!!
-                    MqttCliente.colaMaquinaActualizada(cola)
+                    MqttCliente.colaMaquinaActualizada(maquina!!,cola,ArrayList())
                     tareas.addAll(Utils.agruparColaTrabajo(cola))
                     adapter?.notifyDataSetChanged()
                 }
@@ -235,8 +235,11 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                 response: Response<List<MaquinaColaTrabajo>>
             ) {
                 if(response.isSuccessful && response.body()!=null){
-                    tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
+                    var cola = response.body()!!
+                    MqttCliente.colaMaquinaActualizada(maquina!!,cola,agrupacion.tareas)
+                    tareas.addAll(Utils.agruparColaTrabajo(cola))
                     adapter?.notifyDataSetChanged()
+
                 }
             }
 

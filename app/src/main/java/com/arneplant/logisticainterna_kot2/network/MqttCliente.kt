@@ -2,7 +2,9 @@ package com.arneplant.logisticainterna_kot2.network
 
 import android.content.Context
 import android.util.Log
+import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
+import com.arneplant.logisticainterna_kot2.model.dto.ColaMaquinaActualizada
 import com.arneplant.logisticainterna_kot2.model.dto.Consumo
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
@@ -17,10 +19,10 @@ object MqttCliente {
         this.cliente = MqttClientHelper(ctx,operario)
     }
 
-
-    fun colaMaquinaActualizada(cola :List<MaquinaColaTrabajo>){
-        val topic = "/maquina/programacion"
-        val msg = Gson().toJson(cola)
+    fun colaMaquinaActualizada(maquina: Maquina, cola :List<MaquinaColaTrabajo>, colaBorrados:List<MaquinaColaTrabajo>){
+        var colaMaquina = ColaMaquinaActualizada(cola,colaBorrados,maquina.id,if (maquina.idBancada==null) 0 else maquina.idBancada)
+        val topic = "/bancada/${colaMaquina.idBancada}/maquina/${maquina.id}/programacion"
+        val msg = Gson().toJson(colaMaquina)
         publicar(msg,topic)
     }
 
