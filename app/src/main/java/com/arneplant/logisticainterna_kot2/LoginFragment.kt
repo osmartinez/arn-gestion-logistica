@@ -13,13 +13,13 @@ import com.arneplant.logisticainterna_kot2.model.Operario
 import com.arneplant.logisticainterna_kot2.network_implementation.OperarioService
 import com.arneplant.logisticainterna_kot2.util.Dialogos
 import kotlinx.android.synthetic.main.login_fragment.*
+import kotlinx.android.synthetic.main.login_fragment.view.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class LoginFragment : Fragment() {
 
-    var ctx: Context? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +40,19 @@ class LoginFragment : Fragment() {
 
         }
 
+        view.btOk.setOnClickListener{ok()}
+        view.btBorrar.setOnClickListener { borrar() }
+        view.bt0.setOnClickListener{clickNumero("0")}
+        view.bt1.setOnClickListener{clickNumero("1")}
+        view.bt2.setOnClickListener{clickNumero("2")}
+        view.bt3.setOnClickListener{clickNumero("3")}
+        view.bt4.setOnClickListener{clickNumero("4")}
+        view.bt5.setOnClickListener{clickNumero("5")}
+        view.bt6.setOnClickListener{clickNumero("6")}
+        view.bt7.setOnClickListener{clickNumero("7")}
+        view.bt8.setOnClickListener{clickNumero("8")}
+        view.bt9.setOnClickListener{clickNumero("9")}
+
         return view
     }
 
@@ -50,22 +63,21 @@ class LoginFragment : Fragment() {
         Store.ID_OPERARIO = id
     }
 
-    fun  clickNumero(v: View){
-        var btn: info.hoang8f.widget.FButton = v as info.hoang8f.widget.FButton
-        var numero = btn.text
+    fun  clickNumero(numero: String){
         tbCodigoOperario.setText(tbCodigoOperario.text.toString()+numero)
     }
 
-    fun borrar(v:View){
+    fun borrar(){
         tbCodigoOperario.setText(tbCodigoOperario.text.toString().dropLast(1))
     }
 
-    fun ok(v:View){
+    fun ok(){
         val service = OperarioService()
         val call = service.buscarPorCodigo("B00"+tbCodigoOperario.text.toString())
         call.enqueue(object: Callback<Operario>{
             override fun onFailure(call: Call<Operario>, t: Throwable) {
-                Dialogos.mostrarDialogoInformacion("Error petición", ctx!!)
+                Dialogos.mostrarDialogoInformacion("Error petición", activity!!)
+                tbCodigoOperario.setText("")
             }
 
             override fun onResponse(call: Call<Operario>, response: Response<Operario>) {
@@ -73,7 +85,7 @@ class LoginFragment : Fragment() {
                 if(response.isSuccessful){
                     var operario = response.body()!!
                     if(operario.nombre!=null && operario.nombre != ""){
-                        var sharedPref = ctx?.getSharedPreferences("MEMORIA_INTERNA", Context.MODE_PRIVATE)?:return
+                        var sharedPref = activity?.getSharedPreferences("MEMORIA_INTERNA", Context.MODE_PRIVATE)?:return
                         with(sharedPref.edit()){
                             putString("OPERARIO_CODIGO","${operario.codigoObrero}")
                             putString("OPERARIO_NOMBRE","${operario.nombre}")
@@ -93,7 +105,7 @@ class LoginFragment : Fragment() {
                 }
 
                 if(error){
-                    Dialogos.mostrarDialogoInformacion("El operario ${tbCodigoOperario.text} no existe", ctx!!)
+                    Dialogos.mostrarDialogoInformacion("El operario ${tbCodigoOperario.text} no existe", activity!!)
                 }
                 else{
                     (activity as NavigationHost).navigateTo(PrincipalFragment(), false)

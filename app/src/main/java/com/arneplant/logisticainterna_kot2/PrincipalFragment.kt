@@ -24,6 +24,8 @@ class PrincipalFragment: Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.principal_fragment,container,false)
 
+        view.userName.setText(if (Store.ID_OPERARIO !=0) Store.NOMBRE_OPERARIO else "<sin operario>")
+
         (activity as AppCompatActivity).setSupportActionBar(view.app_bar)
 
         val fragmentPrimero = PrimerTabFragment()
@@ -47,7 +49,7 @@ class PrincipalFragment: Fragment() {
 
             view.tab_layout.getTabAt(0)?.orCreateBadge?.backgroundColor = resources.getColor(R.color.white)
             view.tab_layout.getTabAt(0)?.orCreateBadge?.badgeTextColor = resources.getColor(R.color.black)
-            view.tab_layout.getTabAt(0)?.orCreateBadge?.number=6
+            view.tab_layout.getTabAt(0)?.orCreateBadge?.number=5
 
         }
 

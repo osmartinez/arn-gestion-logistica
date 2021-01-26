@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.arneplant.logisticainterna_kot2.adapter.TareaProgramadaAdapter
+import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.*
@@ -39,22 +40,9 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dejar_en_maquina)
-        val sharedPref =
-            this.getSharedPreferences("MEMORIA_INTERNA", Context.MODE_PRIVATE) ?: return
-        val defaultValue = null
-        val defaultValueInt = 0
 
-        val codigoOperario = sharedPref.getString("OPERARIO_CODIGO", defaultValue)
-        val nombreOperario = sharedPref.getString("OPERARIO_NOMBRE", defaultValue)
-        idOperario = sharedPref.getInt("OPERARIO_ID", defaultValueInt)
+        this.title = "${Store.CODIGO_OPERARIO} - Dejar en máquina"
 
-        if (codigoOperario != null && nombreOperario != null) {
-            this.title = "${codigoOperario} - Dejar en máquina"
-        } else {
-            val intent = Intent(this, LoginFragment::class.java)
-            startActivity(intent)
-            this.finish()
-        }
         this.adapter = TareaProgramadaAdapter(this, this.tareas)
         this.lista.adapter = this.adapter
         this.log = frgLog as LogFragment
@@ -87,7 +75,7 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
     }
 
     private fun programar(cod: String) {
-        if (codigoMaquina == null ||codigoMaquina == "") {
+        if (codigoMaquina == null || codigoMaquina == "") {
             buzzer?.start()
             (frgLog as LogFragment).log("Primero seleccionar una máquina", false)
             return
@@ -97,14 +85,14 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             val serviceMaquina = MaquinaService()
             val callMaquina = serviceMaquina.findMaquinaByCodigoEtiqueta(codMaquina)
 
-            callMaquina.enqueue(object: Callback<Maquina>{
+            callMaquina.enqueue(object : Callback<Maquina> {
                 override fun onFailure(call: Call<Maquina>, t: Throwable) {
                     codigoMaquina = ""
                 }
 
                 override fun onResponse(call: Call<Maquina>, respMaquina: Response<Maquina>) {
                     codigoMaquina = ""
-                    if(respMaquina.isSuccessful && respMaquina.body()!= null){
+                    if (respMaquina.isSuccessful && respMaquina.body() != null) {
                         val maquina = respMaquina.body()!!
                         val servicePrepaquete = PrepaqueteService()
                         val callPrepaquete =
@@ -139,12 +127,16 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
                                             response.body()!!.size > 1 -> {
                                                 // multioperacion
-                                                data class Key(val codigo: String, val idOperacion: Int)
+                                                data class Key(
+                                                    val codigo: String,
+                                                    val idOperacion: Int
+                                                )
 
                                                 fun PrepaqueteSeccionDTO.toKey() =
                                                     Key(this.codigo, this.idOperacion)
 
-                                                val gruposOf = response.body()!!.groupBy { it.codigo }
+                                                val gruposOf =
+                                                    response.body()!!.groupBy { it.codigo }
                                                 if (gruposOf.size == 1) {
                                                     // multioperacion 1 of
                                                     buzzerMultioperacion?.start()
@@ -161,8 +153,14 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                                                         primerGrupo.second.groupBy { it.idOperacion }
                                                     if (operaciones.size == 1) {
                                                         // agrupacion simple
-                                                        asociarPrepaquete(primerGrupo.second[0], maquina)
-                                                        asociarTareaEjecucionAgrupacion(gruposOf, maquina)
+                                                        asociarPrepaquete(
+                                                            primerGrupo.second[0],
+                                                            maquina
+                                                        )
+                                                        asociarTareaEjecucionAgrupacion(
+                                                            gruposOf,
+                                                            maquina
+                                                        )
                                                     } else {
                                                         // agrupacion multiple
                                                         buzzerMultioperacion?.start()
@@ -177,7 +175,10 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                                             }
                                             else -> {
                                                 buzzer?.start()
-                                                (frgLog as LogFragment).log("Etiqueta no existente", false)
+                                                (frgLog as LogFragment).log(
+                                                    "Etiqueta no existente",
+                                                    false
+                                                )
                                             }
                                         }
                                     }
@@ -190,8 +191,6 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                 }
 
             })
-
-
 
 
         }

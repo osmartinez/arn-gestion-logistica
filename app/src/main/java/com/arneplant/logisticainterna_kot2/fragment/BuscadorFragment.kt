@@ -30,7 +30,7 @@ class BuscadorFragment: Fragment() {
         return viewOfLayout;
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         if(context is BuscadorFragmentDelegate){
             delegate = context
