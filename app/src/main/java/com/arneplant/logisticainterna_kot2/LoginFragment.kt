@@ -4,34 +4,50 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.model.Operario
 import com.arneplant.logisticainterna_kot2.network_implementation.OperarioService
 import com.arneplant.logisticainterna_kot2.util.Dialogos
-import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.login_fragment.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class LoginActivity : AppCompatActivity() {
+class LoginFragment : Fragment() {
 
     var ctx: Context? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-        this.title = "Introduce Número Operario"
-        ctx = this
 
-        val sharedPref = this.getSharedPreferences("MEMORIA_INTERNA",Context.MODE_PRIVATE) ?: return
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.login_fragment, container, false)
+
+        val sharedPref = activity?.getSharedPreferences("MEMORIA_INTERNA",Context.MODE_PRIVATE) ?: return view
         val defaultValue = null
         val codigoOperario = sharedPref.getString("OPERARIO_CODIGO", defaultValue)
         val nombreOperario = sharedPref.getString("OPERARIO_NOMBRE", defaultValue)
+        val idOperario = sharedPref.getInt("OPERARIO_ID", 0)
 
         if(codigoOperario != null && nombreOperario!=null){
-            val intent = Intent(ctx, MainActivity::class.java)
-            startActivity(intent)
-            this.finish()
+            guardarStore(nombreOperario,codigoOperario,idOperario)
+            (activity as NavigationHost).navigateTo(PrincipalFragment(), false)
+
         }
+
+        return view
+    }
+
+
+    fun guardarStore(nombre: String,codigo: String,id:Int){
+        Store.CODIGO_OPERARIO = codigo
+        Store.NOMBRE_OPERARIO = nombre
+        Store.ID_OPERARIO = id
     }
 
     fun  clickNumero(v: View){
@@ -65,6 +81,8 @@ class LoginActivity : AppCompatActivity() {
                             commit()
                         }
 
+                        guardarStore(operario.nombre,operario.codigoObrero,operario.id)
+
                     }
                     else{
                         error = true
@@ -78,16 +96,11 @@ class LoginActivity : AppCompatActivity() {
                     Dialogos.mostrarDialogoInformacion("El operario ${tbCodigoOperario.text} no existe", ctx!!)
                 }
                 else{
-                    val intent = Intent(ctx, MainActivity::class.java)
-                    startActivity(intent)
-                    cerrar()
+                    (activity as NavigationHost).navigateTo(PrincipalFragment(), false)
                 }
             }
 
         })
     }
 
-    fun cerrar(){
-        this.finish()
-    }
 }

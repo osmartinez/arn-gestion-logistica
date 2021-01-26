@@ -1,6 +1,5 @@
 package com.arneplant.logisticainterna_kot2
 
-import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -12,24 +11,18 @@ import com.arneplant.logisticainterna_kot2.adapter.ConsumoMaquinaAdapter
 import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
 import com.arneplant.logisticainterna_kot2.delegate.RestaurarConsumosDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
-import com.arneplant.logisticainterna_kot2.model.CodigoRespuesta
 import com.arneplant.logisticainterna_kot2.model.Maquina
-import com.arneplant.logisticainterna_kot2.model.Respuesta
 import com.arneplant.logisticainterna_kot2.model.dto.Consumo
 import com.arneplant.logisticainterna_kot2.util.Dialogos
 import com.arneplant.logisticainterna_kot2.util.Tipo
 import com.arneplant.logisticainterna_kot2.util.Utils
-import kotlinx.android.synthetic.main.activity_programacion_maquina.*
-import kotlinx.android.synthetic.main.activity_sacar_de_maquina.*
 import kotlinx.android.synthetic.main.activity_sacar_de_maquina.frgLog
 import kotlinx.android.synthetic.main.activity_sacar_de_maquina.lista
-import okhttp3.internal.Util
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
 import com.arneplant.logisticainterna_kot2.model.dto.Desconsumo
 import com.arneplant.logisticainterna_kot2.model.dto.MaquinaEtiqueta
@@ -71,7 +64,7 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
             this.title = "${codigoOperario} - Sacar de máquina"
         }
         else{
-            val intent = Intent(this, LoginActivity::class.java)
+            val intent = Intent(this, LoginFragment::class.java)
             startActivity(intent)
             this.finish()
         }

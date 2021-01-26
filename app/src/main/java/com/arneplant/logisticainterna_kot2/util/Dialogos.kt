@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.dialogo_multioperacion.*
 import kotlinx.android.synthetic.main.no_programada_dialog.*
 
 import android.widget.LinearLayout
+import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
 
 
@@ -62,7 +63,7 @@ object Dialogos {
         }
     }
 
-    fun mostrarDialogoMultiOperacionAsociar(operaciones: List<PrepaqueteSeccionDTO> ,choiceFunction: (prepaquete:PrepaqueteSeccionDTO)->Unit, ctx:Context){
+    fun mostrarDialogoMultiOperacionAsociar(operaciones: List<PrepaqueteSeccionDTO> ,maquina: Maquina,choiceFunction: (prepaquete:PrepaqueteSeccionDTO, maquina:Maquina)->Unit, ctx:Context){
         var dialog: Dialog = Dialog(ctx)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         if(dialog.window != null){
@@ -93,7 +94,7 @@ object Dialogos {
             params.bottomMargin =60
             btn.setLayoutParams(params)
 
-            btn.setOnClickListener { choiceFunction(operacion); dialog.dismiss()  }
+            btn.setOnClickListener { choiceFunction(operacion,maquina); dialog.dismiss()  }
             dialog.panelBotones.addView(btn)
             i++
         }

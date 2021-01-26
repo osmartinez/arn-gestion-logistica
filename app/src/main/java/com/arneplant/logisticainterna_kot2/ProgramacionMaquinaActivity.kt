@@ -12,27 +12,21 @@ import com.arneplant.logisticainterna_kot2.delegate.DesprogramarDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
-import com.arneplant.logisticainterna_kot2.model.TareaPendiente
 import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionCola
 import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaEjecucion
 import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaProgramacion
 import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
 import com.arneplant.logisticainterna_kot2.network.MqttCliente
-import com.arneplant.logisticainterna_kot2.network_implementation.GestionPaqueteMaquina
 import com.arneplant.logisticainterna_kot2.network_implementation.MaquinaService
 import com.arneplant.logisticainterna_kot2.network_implementation.PrepaqueteService
-import com.arneplant.logisticainterna_kot2.network_implementation.TareaProgramadaService
 import com.arneplant.logisticainterna_kot2.util.Dialogos
 import com.arneplant.logisticainterna_kot2.util.Tipo
 import com.arneplant.logisticainterna_kot2.util.Utils
-import kotlinx.android.synthetic.main.activity_dejar_en_maquina.*
-import kotlinx.android.synthetic.main.activity_programacion_maquina.*
 import kotlinx.android.synthetic.main.activity_programacion_maquina.frgLog
 import kotlinx.android.synthetic.main.activity_programacion_maquina.lista
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.HashMap
 
 class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate , DesprogramarDelegate{
 
@@ -67,7 +61,7 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
         if (codigoOperario != null && nombreOperario != null) {
             this.title = "${codigoOperario} - Dejar en máquina"
         } else {
-            val intent = Intent(this, LoginActivity::class.java)
+            val intent = Intent(this, LoginFragment::class.java)
             startActivity(intent)
             this.finish()
         }
@@ -124,7 +118,7 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                             when {
                                 response.body()!!.size == 1 -> {
                                     // simple
-                                    programarPrepaquete(response.body()!![0])
+                                    programarPrepaquete(response.body()!![0], maquina!!)
                                 }
 
                                 response.body()!!.size > 1 -> {
@@ -140,6 +134,7 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                                         buzzerMultioperacion?.start()
                                         Dialogos.mostrarDialogoMultiOperacionAsociar(
                                             gruposOf.toList().first().second,
+                                            maquina!!,
                                             ::programarPrepaquete,
                                             ctx!!
                                         )
@@ -153,13 +148,14 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                                         // varias ofs pero con 1 operacion
                                         if (operaciones.size == 1) {
                                             // agrupacion simple
-                                            programarPrepaquetes(response.body()!!)
+                                            programarPrepaquetes(response.body()!!,maquina!!)
                                         } else {
                                             // agrupacion multiple
                                             // ESTO ESTA MAL HAY QUE CORREGIRLOO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                                             buzzerMultioperacion?.start()
                                             Dialogos.mostrarDialogoMultiOperacionAsociar(
                                                 operaciones.toList().first().second,
+                                                maquina!!,
                                                 ::programarPrepaquete,
                                                 ctx!!
                                             )
@@ -203,11 +199,11 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
         })
     }
 
-    private fun programarPrepaquete(pre: PrepaqueteSeccionDTO){
+    private fun programarPrepaquete(pre: PrepaqueteSeccionDTO,maquina:Maquina){
         programarColaMaquina(pre.idTarea.toString(), 0)
     }
 
-    private fun programarPrepaquetes(pres: List<PrepaqueteSeccionDTO>){
+    private fun programarPrepaquetes(pres: List<PrepaqueteSeccionDTO>, maquina:Maquina){
         var idsTareas = ""
         for(pre in pres){
             idsTareas+= "${pre.idTarea},"
