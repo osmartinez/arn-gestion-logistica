@@ -19,11 +19,16 @@ object MqttCliente {
         this.cliente = MqttClientHelper(ctx,operario)
     }
 
+    fun imprimirHojaProduccion(idOperario: Int){
+        val topic = "/operario/${idOperario}/imprimir/hojaProduccion"
+        publicar("",topic,1)
+    }
+
     fun colaMaquinaActualizada(maquina: Maquina, cola :List<MaquinaColaTrabajo>, colaBorrados:List<MaquinaColaTrabajo>){
         var colaMaquina = ColaMaquinaActualizada(cola,colaBorrados,maquina.id,if (maquina.idBancada==null) 0 else maquina.idBancada)
         val topic = "/bancada/${colaMaquina.idBancada}/maquina/${maquina.id}/programacion"
         val msg = Gson().toJson(colaMaquina)
-        publicar(msg,topic)
+        publicar(msg,topic,1)
     }
 
     fun asociarTarea(ipAutomata: String,numPrensa: Int, idTarea:Int, paresTarea: Int, codigoOF: String, utillaje:String,tallaUtillaje:String, tallaArticulo:String, codigoEtiqueta:String, idOrden: Int, idOperacion: Int, nombreCliente: String, codigoArticulo:String, paresUtillaje: Int, idOperario: Int){
@@ -44,7 +49,7 @@ object MqttCliente {
                 "${paresUtillaje.toString().padStart(LEN_PARESUTILLAJE)};"+
                 "${idOperario.toString().padStart(LEN_IDOPERARIO)};"
 
-        publicar(msg,topic)
+        publicar(msg,topic,1)
     }
 
     fun consumirTarea(consumo: Consumo){
@@ -57,12 +62,12 @@ object MqttCliente {
             "CantidadPaquete": ${consumo.cantidadPaquete}
             }
         """.trimIndent()
-        publicar(msg,topic)
+        publicar(msg,topic,1)
     }
 
-    private fun publicar(msg: String, topic:String){
+    private fun publicar(msg: String, topic:String, qos: Int){
         try {
-            this.cliente?.publish(topic,msg)
+            this.cliente?.publish(topic,msg,qos)
         }catch (ex: Exception){
             Log.d("error mqtt",ex.message)
         }

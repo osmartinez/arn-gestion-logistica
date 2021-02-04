@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.model.Operario
@@ -20,6 +21,7 @@ import retrofit2.Response
 
 class LoginFragment : Fragment() {
 
+    var btOk: Button? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +55,8 @@ class LoginFragment : Fragment() {
         view.bt8.setOnClickListener{clickNumero("8")}
         view.bt9.setOnClickListener{clickNumero("9")}
 
+        this.btOk = view.btOk
+
         return view
     }
 
@@ -74,10 +78,15 @@ class LoginFragment : Fragment() {
     fun ok(){
         val service = OperarioService()
         val call = service.buscarPorCodigo("B00"+tbCodigoOperario.text.toString())
+
+        btOk?.isEnabled = false
+
         call.enqueue(object: Callback<Operario>{
             override fun onFailure(call: Call<Operario>, t: Throwable) {
                 Dialogos.mostrarDialogoInformacion("Error petición", activity!!)
                 tbCodigoOperario.setText("")
+                btOk?.isEnabled = true
+
             }
 
             override fun onResponse(call: Call<Operario>, response: Response<Operario>) {
@@ -110,6 +119,8 @@ class LoginFragment : Fragment() {
                 else{
                     (activity as NavigationHost).navigateTo(PrincipalFragment(), false)
                 }
+
+                btOk?.isEnabled = true
             }
 
         })

@@ -29,6 +29,7 @@ class PrincipalFragment: Fragment() {
         (activity as AppCompatActivity).setSupportActionBar(view.app_bar)
 
         val fragmentPrimero = PrimerTabFragment()
+        val fragmentSegundo = SegundoTabFragment()
 
         view.tab_layout.setupWithViewPager(view.view_pager)
 
@@ -43,6 +44,7 @@ class PrincipalFragment: Fragment() {
                 )
             // páginas
             viewPagerAdapter.addFragment(fragmentPrimero, "Módulo 1")
+            viewPagerAdapter.addFragment(fragmentSegundo,"Módulo 2")
 
             // paginas!
             view.view_pager.adapter = viewPagerAdapter
@@ -50,6 +52,10 @@ class PrincipalFragment: Fragment() {
             view.tab_layout.getTabAt(0)?.orCreateBadge?.backgroundColor = resources.getColor(R.color.white)
             view.tab_layout.getTabAt(0)?.orCreateBadge?.badgeTextColor = resources.getColor(R.color.black)
             view.tab_layout.getTabAt(0)?.orCreateBadge?.number=5
+
+            view.tab_layout.getTabAt(1)?.orCreateBadge?.backgroundColor = resources.getColor(R.color.white)
+            view.tab_layout.getTabAt(1)?.orCreateBadge?.badgeTextColor = resources.getColor(R.color.black)
+            view.tab_layout.getTabAt(1)?.orCreateBadge?.number=1
 
         }
 

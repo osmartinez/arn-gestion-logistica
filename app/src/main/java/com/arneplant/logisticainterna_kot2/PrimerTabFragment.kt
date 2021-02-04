@@ -73,9 +73,11 @@ class PrimerTabFragment: Fragment() {
 
         MqttCliente.cerrar()
 
+        for(frag in activity!!.supportFragmentManager.fragments){
+            activity!!.supportFragmentManager.beginTransaction().remove(frag).commit()
+        }
         activity!!.supportFragmentManager
             .beginTransaction()
-            .remove(this)
             .add(R.id.container, LoginFragment())
             .commit()
     }

@@ -23,6 +23,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import android.view.Menu
 import android.view.MenuItem
+import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
 import com.arneplant.logisticainterna_kot2.model.dto.Desconsumo
 import com.arneplant.logisticainterna_kot2.model.dto.MaquinaEtiqueta
@@ -46,28 +47,20 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
     private var buzzerNotaAcabada: MediaPlayer? = null
     private var buzzerMultioperacion: MediaPlayer? = null
     private var sharedPreferences: SharedPreferences? = null
-    private var idOperario: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sacar_de_maquina)
 
         this.ctx = this
-        val sharedPref = this.getSharedPreferences("MEMORIA_INTERNA",Context.MODE_PRIVATE) ?: return
-        val defaultValue = null
-        val defaultValueInt = 0
-        val codigoOperario = sharedPref.getString("OPERARIO_CODIGO", defaultValue)
-        val nombreOperario = sharedPref.getString("OPERARIO_NOMBRE", defaultValue)
-        idOperario = sharedPref.getInt("OPERARIO_ID", defaultValueInt)
 
-        if(codigoOperario != null && nombreOperario!=null){
-            this.title = "${codigoOperario} - Sacar de máquina"
+        if(Store.ID_OPERARIO != 0){
+            this.title = "${Store.CODIGO_OPERARIO} - Sacar de máquina"
         }
         else{
-            val intent = Intent(this, LoginFragment::class.java)
-            startActivity(intent)
             this.finish()
         }
+
         this.adapter = ConsumoMaquinaAdapter(this, maquinas)
         this.lista.adapter = this.adapter
         this.log = frgLog as LogFragment
@@ -144,7 +137,7 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         val serviceTarea = TareaProgramadaService()
         val serviceOf = OrdenFabricacionService()
 
-        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta, msg,0,this.idOperario))
+        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta, msg,0,Store.ID_OPERARIO))
         val callOperaciones = serviceOf.buscarOperacionesPorPrepaqueteMaquina(msg, this.maquina?.codigoEtiqueta!!)
 
         val idMaquina = this.maquina!!.id
@@ -196,7 +189,7 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
     private fun consumirOperacion(operacion: OrdenFabricacionOperacion,codigoEtiqueta:String):Unit{
 
         val serviceTarea = TareaProgramadaService()
-        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta,codigoEtiqueta, operacion.id, this.idOperario))
+        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta,codigoEtiqueta, operacion.id, Store.ID_OPERARIO))
         val idMaquina = this.maquina!!.id
 
         callTarea.enqueue(object : Callback<List<Consumo>> {
