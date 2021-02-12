@@ -51,6 +51,8 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         this.buzzer = MediaPlayer.create(this, R.raw.buzzer)
         this.buzzerMultioperacion = MediaPlayer.create(this, R.raw.multioperacion)
 
+        this.idOperario = Store.ID_OPERARIO
+
         this.runOnUiThread(Runnable {
             //Cambiar controles
         })

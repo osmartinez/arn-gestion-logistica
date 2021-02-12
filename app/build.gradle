@@ -10,7 +10,7 @@ android {
         applicationId "com.arneplant.logisticainterna_kot2"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 52
+        versionCode 54
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
