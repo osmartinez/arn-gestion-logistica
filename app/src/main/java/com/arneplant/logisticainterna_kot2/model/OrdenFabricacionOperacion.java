@@ -14,6 +14,12 @@ public class OrdenFabricacionOperacion implements Serializable {
     private String CodSeccion;
     private Utillaje Utillaje;
     private String CodConexion;
+    private String TallaConsumir;
+    private Double CantidadConsumir;
+    private String CodigoEtiqueta;
+    private int IdOrdenFabricacion;
+    private int IdBarquillaContenido;
+
     private List<OrdenFabricacionOperacionTalla> OrdenFabOperacionesTallas;
 
     public int getID() {
@@ -102,5 +108,45 @@ public class OrdenFabricacionOperacion implements Serializable {
 
     public void setOrdenFabOperacionesTallas(List<OrdenFabricacionOperacionTalla> ordenFabOperacionesTallas) {
         OrdenFabOperacionesTallas = ordenFabOperacionesTallas;
+    }
+
+    public String getTallaConsumir() {
+        return TallaConsumir;
+    }
+
+    public void setTallaConsumir(String tallaConsumir) {
+        TallaConsumir = tallaConsumir;
+    }
+
+    public Double getCantidadConsumir() {
+        return CantidadConsumir;
+    }
+
+    public void setCantidadConsumir(Double cantidadConsumir) {
+        CantidadConsumir = cantidadConsumir;
+    }
+
+    public String getCodigoEtiqueta() {
+        return CodigoEtiqueta;
+    }
+
+    public void setCodigoEtiqueta(String codigoEtiqueta) {
+        CodigoEtiqueta = codigoEtiqueta;
+    }
+
+    public int getIdBarquillaContenido() {
+        return IdBarquillaContenido;
+    }
+
+    public void setIdBarquillaContenido(int idBarquillaContenido) {
+        IdBarquillaContenido = idBarquillaContenido;
+    }
+
+    public int getIdOrdenFabricacion() {
+        return IdOrdenFabricacion;
+    }
+
+    public void setIdOrdenFabricacion(int idOrdenFabricacion) {
+        IdOrdenFabricacion = idOrdenFabricacion;
     }
 }

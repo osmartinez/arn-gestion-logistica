@@ -22,9 +22,47 @@ import kotlinx.android.synthetic.main.no_programada_dialog.*
 import android.widget.LinearLayout
 import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
+import com.arneplant.logisticainterna_kot2.network_implementation.OrdenFabricacionService
 
 
 object Dialogos {
+
+    fun mostrarDialogoMultiOperacion(descripciones: List<String>, operaciones:List<OrdenFabricacionOperacion>, servicio: OrdenFabricacionService,idMaquina:Int, choiceFunction: (servicio: OrdenFabricacionService,operaciones: List<OrdenFabricacionOperacion>, idMaquina: Int, descripcion:String)->Unit, ctx:Context){
+        var dialog: Dialog = Dialog(ctx)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        if(dialog.window != null){
+            var colorDrawable : ColorDrawable = ColorDrawable(Color.TRANSPARENT)
+            dialog.window.setBackgroundDrawable(colorDrawable)
+        }
+        dialog.setContentView(R.layout.dialogo_multioperacion)
+        dialog.setCancelable(true)
+        dialog.show()
+
+        var colores = ArrayList<Int>()
+        colores.add(Color.BLUE)
+        colores.add(Color.RED)
+        colores.add(Color.GREEN)
+        colores.add(Color.MAGENTA)
+
+        var i = 0
+        for(operacion in descripciones){
+            var btn :Button = Button(ctx)
+            btn.setTextColor(Color.WHITE)
+            btn.setBackgroundColor(colores[i%colores.size])
+            btn.setText(operacion)
+
+            val params = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            params.bottomMargin =60
+            btn.setLayoutParams(params)
+
+            btn.setOnClickListener { choiceFunction(servicio,operaciones,idMaquina,operacion); dialog.dismiss()  }
+            dialog.panelBotones.addView(btn)
+            i++
+        }
+    }
 
     fun mostrarDialogoMultiOperacion(operaciones: List<OrdenFabricacionOperacion> ,choiceFunction: (operacion:OrdenFabricacionOperacion, codigoEtiqueta: String)->Unit,codigoEtiqueta:String, ctx:Context){
         var dialog: Dialog = Dialog(ctx)

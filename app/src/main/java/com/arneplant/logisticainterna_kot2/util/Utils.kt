@@ -28,13 +28,15 @@ object Utils {
             Tipo.EspacioVagon
         } else if (cod.startsWith("02")) {
             Tipo.Maquina
+        } else if (cod.startsWith("05")) {
+            Tipo.Barquilla
         } else {
             Tipo.None
         }
     }
 
-    fun agruparColaTrabajo(cola: List<MaquinaColaTrabajo>):ArrayList<AgrupacionCola> {
-        var tareas : ArrayList<AgrupacionCola> = ArrayList()
+    fun agruparColaTrabajo(cola: List<MaquinaColaTrabajo>): ArrayList<AgrupacionCola> {
+        var tareas: ArrayList<AgrupacionCola> = ArrayList()
         val mapa = HashMap<Int, ArrayList<MaquinaColaTrabajo>>()
         for (tarea in cola) {
             if (!mapa.containsKey(tarea.agrupacion)) {
@@ -46,12 +48,11 @@ object Utils {
             }
         }
 
-        for(par in mapa){
-            if(par.key!=0){
+        for (par in mapa) {
+            if (par.key != 0) {
                 tareas.add(AgrupacionCola(par.value))
-            }
-            else{
-                for(tarea in par.value){
+            } else {
+                for (tarea in par.value) {
                     val listaUnica = ArrayList<MaquinaColaTrabajo>()
                     listaUnica.add(tarea)
                     tareas.add(AgrupacionCola(listaUnica))
@@ -59,19 +60,19 @@ object Utils {
             }
         }
 
-        tareas.sortBy { x->x.posicion }
+        tareas.sortBy { x -> x.posicion }
         return tareas
     }
 
-    fun shortNombreCliente(cliente: String):String{
-        if(cliente.length>20){
+    fun shortNombreCliente(cliente: String): String {
+        if (cliente.length > 20) {
             return cliente.take(20)
         }
         return cliente
     }
 
-    fun shortModelo(modelo: String):String{
-        if(modelo.length>17){
+    fun shortModelo(modelo: String): String {
+        if (modelo.length > 17) {
             return modelo.take(17)
         }
         return modelo

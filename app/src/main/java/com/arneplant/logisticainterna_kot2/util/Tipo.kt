@@ -14,4 +14,5 @@ enum class Tipo {
     CajaEnvio,
     IP,
     Maquina,
+    Barquilla,
 }

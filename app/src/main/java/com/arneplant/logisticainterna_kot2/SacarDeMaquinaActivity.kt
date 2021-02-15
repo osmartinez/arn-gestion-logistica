@@ -25,10 +25,12 @@ import android.view.Menu
 import android.view.MenuItem
 import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
+import com.arneplant.logisticainterna_kot2.model.dto.BodyConsumirOperacionBarquilla
 import com.arneplant.logisticainterna_kot2.model.dto.Desconsumo
 import com.arneplant.logisticainterna_kot2.model.dto.MaquinaEtiqueta
 import com.arneplant.logisticainterna_kot2.network.MqttCliente
 import com.arneplant.logisticainterna_kot2.network_implementation.*
+import retrofit2.http.Body
 
 
 class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
@@ -122,7 +124,97 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
             Tipo.PrePaquete -> {
                 consumirEtiqueta(msg)
             }
+            Tipo.Barquilla ->{
+                consumirBarquilla(msg)
+            }
         }
+    }
+
+    private fun consumirBarquilla(cod:String){
+        if (this.maquina == null) {
+            Dialogos.mostrarDialogoInformacion("Primero selecciona una máquina", this)
+            buzzer?.start()
+            return
+        }
+
+        val idMaquina = this.maquina!!.id
+        val codSeccion = this.maquina!!.codSeccion
+        val serviceOf = OrdenFabricacionService()
+        val callOperaciones = serviceOf.buscarOperacionesPorBarquillaSeccion(cod, codSeccion)
+
+        callOperaciones.enqueue(object:Callback<List<OrdenFabricacionOperacion>>{
+            override fun onFailure(call: Call<List<OrdenFabricacionOperacion>>, t: Throwable) {
+                (frgLog as LogFragment).log("Error de protocolo",false)
+                buzzer?.start()
+            }
+
+            override fun onResponse(
+                call: Call<List<OrdenFabricacionOperacion>>,
+                response: Response<List<OrdenFabricacionOperacion>>
+            ) {
+                if(response.isSuccessful && response.body()!= null){
+                    consumirOperaciones(serviceOf, response.body()!!, idMaquina)
+                }
+                else{
+                    (frgLog as LogFragment).log("Error en la respuesta",false)
+                    buzzer?.start()
+                }
+            }
+
+        })
+
+    }
+
+    private fun consumirOperaciones(servicio: OrdenFabricacionService,operaciones: List<OrdenFabricacionOperacion>, idMaquina: Int){
+        var body :BodyConsumirOperacionBarquilla? = null
+
+        var idOrdenes = operaciones.map { it.idOrdenFabricacion }
+        var idOrdenesDistinct = operaciones.map{it.idOrdenFabricacion}.distinct()
+
+
+        if(idOrdenes.size != idOrdenesDistinct.size){
+            val descripciones = operaciones.map{it.descripcion}.distinct()
+            buzzerMultioperacion?.start()
+            Dialogos.mostrarDialogoMultiOperacion(descripciones,operaciones,servicio,idMaquina,::consumirOperacionesMulti,ctx!!)
+        }
+        else{
+            for(ofo in operaciones){
+                consumirOperacionBarquilla(servicio,BodyConsumirOperacionBarquilla(ofo,Store.ID_OPERARIO,idMaquina))
+            }
+        }
+    }
+
+    private fun consumirOperacionesMulti(servicio: OrdenFabricacionService,operaciones: List<OrdenFabricacionOperacion>, idMaquina: Int, descripcion: String){
+        var body :BodyConsumirOperacionBarquilla? = null
+
+        var idOrdenes = operaciones.map { it.idOrdenFabricacion }
+        var idOrdenesDistinct = operaciones.map{it.idOrdenFabricacion}.distinct()
+
+
+        if(idOrdenes.size != idOrdenesDistinct.size && descripcion!=null){
+            for(ofo in operaciones){
+                if(ofo.descripcion == descripcion){
+                    consumirOperacionBarquilla(servicio,BodyConsumirOperacionBarquilla(ofo,Store.ID_OPERARIO,idMaquina))
+                }
+            }
+        }
+
+    }
+
+    private fun consumirOperacionBarquilla(servicio: OrdenFabricacionService,body: BodyConsumirOperacionBarquilla){
+        val callConsumo = servicio.consumirBarquillaOperacion(body!!)
+        callConsumo.enqueue(object: Callback<List<Consumo>>{
+            override fun onFailure(call: Call<List<Consumo>>, t: Throwable) {
+                (frgLog as LogFragment).log("Error en la petición",false)
+                buzzer?.start()
+            }
+
+            override fun onResponse(call: Call<List<Consumo>>, response: Response<List<Consumo>>) {
+                if(response.isSuccessful && response.body()!=null)
+                    consumosRecibidos(body.idMaquina,response.body()!!)
+            }
+
+        })
     }
 
     /**
@@ -165,7 +257,8 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
                                     consumosRecibidos(idMaquina, response.body()!!)
                                 } else {
                                     buzzer?.start()
-                                    (frgLog as LogFragment).log("Respuesta == null",false)                                }
+                                    (frgLog as LogFragment).log("Respuesta == null",false)
+                                }
                             }
 
                         })
