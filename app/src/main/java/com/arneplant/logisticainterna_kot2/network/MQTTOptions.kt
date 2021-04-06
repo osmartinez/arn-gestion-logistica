@@ -8,7 +8,7 @@ package com.arneplant.logisticainterna_kot2.network
 // https://console.solace.cloud/services/ -> <your-service> -> 'Connect' -> 'MQTT'
 
 const val LEN_IPAUTOMATA = 3
-const val LEN_NUMPRENSA = 1
+const val LEN_NUMPRENSA = 2
 const val LEN_IDTAREA = 10
 const val LEN_PARESTAREA = 10
 const val LEN_CODIGOOF = 13

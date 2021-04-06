@@ -8,11 +8,12 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.BaseAdapter
 import android.widget.ListView
+import androidx.core.content.ContextCompat
 import com.arneplant.logisticainterna_kot2.R
 import com.arneplant.logisticainterna_kot2.model.UbicacionPaquetes
 import kotlinx.android.synthetic.main.entry_ubicacion_paquetes.view.*
 
-class UbicacionAdapter (private val context: Context,
+class UbicacionAdapter (val context: Context,
                         private val dataSource:List<UbicacionPaquetes>): BaseAdapter() {
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
@@ -31,7 +32,7 @@ class UbicacionAdapter (private val context: Context,
     }
 
     override fun getViewTypeCount(): Int {
-        return count
+        return 1
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -42,8 +43,63 @@ class UbicacionAdapter (private val context: Context,
         val rowView = inflater.inflate(R.layout.entry_ubicacion_paquetes, parent, false)
         this.views.add(position,rowView)
         var item = getItem(position) as UbicacionPaquetes
-        rowView.tbNombreUbicacion.text = item.nombre
-        rowView.tbPaquetesDescargados.text = item.toString()
+        rowView.tbUbicacion.text = item.nombreUbicacion
+        rowView.tbBarquillasUbicadas.text = "${item.barquillas.size} barquillas"
+        rowView.tbPaquetesUbicados.text = "${item.paquetes.size} paquetes"
+        rowView.tbUtillajesUbicados.text = "${item.utillajes.size} utillajes"
+
+        if (item.isSeleccionada) {
+            rowView.tbUbicacion.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_midnight_blue
+                )
+            )
+            rowView.panelUbicacion1.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_emerald
+                )
+            )
+            rowView.panelUbicacion2.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_emerald
+                )
+            )
+            rowView.panelUbicacion3.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_emerald
+                )
+            )
+        } else {
+            rowView.tbUbicacion.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_midnight_blue
+                )
+            )
+            rowView.panelUbicacion1.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_carrot
+                )
+            )
+            rowView.panelUbicacion3.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_carrot
+                )
+            )
+            rowView.panelUbicacion2.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.fbutton_color_carrot
+                )
+            )
+        }
+
         return rowView
     }
 

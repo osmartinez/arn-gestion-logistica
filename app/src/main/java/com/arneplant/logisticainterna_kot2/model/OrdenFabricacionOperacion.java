@@ -12,7 +12,7 @@ public class OrdenFabricacionOperacion implements Serializable {
     private String Descripcion;
     private Seccion Seccion;
     private String CodSeccion;
-    private Utillaje Utillaje;
+    private String Utillaje;
     private String CodConexion;
     private String TallaConsumir;
     private Double CantidadConsumir;
@@ -86,11 +86,11 @@ public class OrdenFabricacionOperacion implements Serializable {
         CodSeccion = codSeccion;
     }
 
-    public com.arneplant.logisticainterna_kot2.model.Utillaje getUtillaje() {
+    public String getUtillaje() {
         return Utillaje;
     }
 
-    public void setUtillaje(com.arneplant.logisticainterna_kot2.model.Utillaje utillaje) {
+    public void setUtillaje(String utillaje) {
         Utillaje = utillaje;
     }
 

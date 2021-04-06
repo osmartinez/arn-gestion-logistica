@@ -101,6 +101,43 @@ object Dialogos {
         }
     }
 
+    fun mostrarDialogoMultiOperacionAsociar(operaciones: List<PrepaqueteSeccionDTO> ,maquina: Maquina,choiceFunction: (prepaquete:List<PrepaqueteSeccionDTO>, maquina:Maquina, descripcion:String)->Unit, ctx:Context){
+        var dialog: Dialog = Dialog(ctx)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        if(dialog.window != null){
+            var colorDrawable : ColorDrawable = ColorDrawable(Color.TRANSPARENT)
+            dialog.window.setBackgroundDrawable(colorDrawable)
+        }
+        dialog.setContentView(R.layout.dialogo_multioperacion)
+        dialog.setCancelable(true)
+        dialog.show()
+
+        var colores = ArrayList<Int>()
+        colores.add(Color.BLUE)
+        colores.add(Color.RED)
+        colores.add(Color.GREEN)
+        colores.add(Color.MAGENTA)
+
+        var i = 0
+        for(operacion in operaciones){
+            var btn :Button = Button(ctx)
+            btn.setTextColor(Color.WHITE)
+            btn.setBackgroundColor(colores[i%colores.size])
+            btn.setText(operacion.descripcion)
+
+            val params = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            params.bottomMargin =60
+            btn.setLayoutParams(params)
+
+            btn.setOnClickListener { choiceFunction(operaciones,maquina, operacion.descripcion); dialog.dismiss()  }
+            dialog.panelBotones.addView(btn)
+            i++
+        }
+    }
+
     fun mostrarDialogoMultiOperacionAsociar(operaciones: List<PrepaqueteSeccionDTO> ,maquina: Maquina,choiceFunction: (prepaquete:PrepaqueteSeccionDTO, maquina:Maquina)->Unit, ctx:Context){
         var dialog: Dialog = Dialog(ctx)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)

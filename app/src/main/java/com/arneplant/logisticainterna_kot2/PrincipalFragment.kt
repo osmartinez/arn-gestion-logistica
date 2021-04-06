@@ -55,7 +55,7 @@ class PrincipalFragment: Fragment() {
 
             view.tab_layout.getTabAt(1)?.orCreateBadge?.backgroundColor = resources.getColor(R.color.white)
             view.tab_layout.getTabAt(1)?.orCreateBadge?.badgeTextColor = resources.getColor(R.color.black)
-            view.tab_layout.getTabAt(1)?.orCreateBadge?.number=1
+            view.tab_layout.getTabAt(1)?.orCreateBadge?.number=2
 
         }
 

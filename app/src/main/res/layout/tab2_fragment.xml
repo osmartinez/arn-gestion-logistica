@@ -24,26 +24,63 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:text="HOJA&#10;DE&#10;PRODUCCIÓN"
+                android:text="HOJA&#10;PRODUCC."
                 android:textColor="@color/white"
                 android:textAlignment="center"
                 android:textSize="30sp" />
 
-
+            <info.hoang8f.widget.FButton
+                android:id="@+id/btBuscarUtillaje"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:text="BUSCAR&#10;UTILLAJES"
+                android:textColor="@color/white"
+                android:textSize="30sp" />
         </TableRow>
         <TableRow
             android:id="@+id/row2"
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
             android:layout_weight="1">
-
+            <info.hoang8f.widget.FButton
+                android:id="@+id/BT_2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="30sp" />
+            <info.hoang8f.widget.FButton
+                android:id="@+id/BT_3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="30sp" />
         </TableRow>
         <TableRow
-            android:id="@+id/row3"
+            android:id="@+id/BT_4"
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
             android:layout_weight="1">
-
+            <info.hoang8f.widget.FButton
+                android:id="@+id/BT_5"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="30sp" />
+            <info.hoang8f.widget.FButton
+                android:id="@+id/BT_6"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="30sp" />
         </TableRow>
     </TableLayout>
 

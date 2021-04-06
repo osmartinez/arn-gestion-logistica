@@ -87,7 +87,6 @@
             android:autoText="true"
             android:padding="10dp"
             android:backgroundTint="@color/red"
-            android:textStyle="bold"
             android:textColor="@color/white" />
 
         <info.hoang8f.widget.FButton

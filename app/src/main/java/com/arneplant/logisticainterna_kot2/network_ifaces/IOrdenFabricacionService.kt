@@ -4,9 +4,11 @@ import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
 import com.arneplant.logisticainterna_kot2.model.dto.BodyConsumirOperacionBarquilla
 import com.arneplant.logisticainterna_kot2.model.dto.Consumo
+import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface IOrdenFabricacionService {
@@ -18,6 +20,10 @@ interface IOrdenFabricacionService {
     fun buscarOperacionesPorBarquillaSeccion(@Path("codigoEtiqueta") codigoEtiqueta: String
                                               ,@Path("codigoSeccion") codSeccion: String): Call<List<OrdenFabricacionOperacion>>
 
-    @GET("api/barquillas/consumirOperacion")
+    @GET("api/barquillas/buscarInformacionEnSeccion/{codigoEtiqueta}/{codigoSeccion}")
+    fun buscarInformacionPorBarquillaSeccion(@Path("codigoEtiqueta") codigoEtiqueta: String
+                                             ,@Path("codigoSeccion") codSeccion: String): Call<List<PrepaqueteSeccionDTO>>
+
+    @POST("api/barquillas/consumirOperacion")
     fun consumirBarquillaOperacion(@Body body: BodyConsumirOperacionBarquilla): Call<List<Consumo>>
 }

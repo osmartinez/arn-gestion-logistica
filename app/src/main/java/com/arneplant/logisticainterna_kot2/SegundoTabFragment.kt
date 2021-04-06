@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.network.MqttCliente
+import kotlinx.android.synthetic.main.tab1_fragment.view.*
 import kotlinx.android.synthetic.main.tab2_fragment.view.*
 
 class SegundoTabFragment: Fragment() {
@@ -24,7 +25,13 @@ class SegundoTabFragment: Fragment() {
         val view = inflater.inflate(R.layout.tab2_fragment, container, false)
 
         view.btImprimirHojaProduccion.setOnClickListener { MqttCliente.imprimirHojaProduccion(Store.ID_OPERARIO) }
+        view.btBuscarUtillaje.setOnClickListener { buscarUtillaje() }
 
         return view
+    }
+
+    fun buscarUtillaje(){
+        val intent = Intent(activity, BuscarUtillajesActivity::class.java)
+        startActivity(intent)
     }
 }

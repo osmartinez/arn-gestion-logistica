@@ -30,7 +30,11 @@ object Utils {
             Tipo.Maquina
         } else if (cod.startsWith("05")) {
             Tipo.Barquilla
-        } else {
+        }
+        else if (cod.startsWith("06")) {
+            Tipo.Utillaje
+        }
+        else {
             Tipo.None
         }
     }

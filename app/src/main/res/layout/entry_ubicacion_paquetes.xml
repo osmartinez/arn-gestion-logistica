@@ -1,52 +1,96 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<LinearLayout
+    android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    android:padding="10dp">
+    android:orientation="vertical"
+    android:padding="5dp" >
 
-    <TableLayout
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="ESTANTERIA 4 - ALTURA 2"
+        android:padding="5dp"
+        android:id="@+id/tbUbicacion"
+        android:textSize="18sp"
+        android:textStyle="bold|italic"
+        android:background="@color/fbutton_color_midnight_blue"
+        android:clickable="true"
+        android:textColor="@color/white" />
+
+    <RelativeLayout
+        android:id="@+id/panelUbicacion1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/tbNombreUbicacion"
-                android:layout_width="165dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
-                android:layout_marginLeft="40dp"
-                android:background="@drawable/borde"
-                android:paddingLeft="8dp"
-                android:paddingTop="5dp"
-                android:paddingRight="12dp"
-                android:paddingBottom="5dp"
-                android:text="UBICACIÓN X"
-                android:textColor="#000000"
-                android:textSize="15dp"
-                android:layout_weight="1"/>
-        </TableRow>
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:background="@color/fbutton_color_carrot">
 
-        <TableRow
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tbPaquetesUbicados"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp">
-            <TextView
-                android:id="@+id/tbPaquetesDescargados"
-                android:layout_width="165dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
-                android:layout_marginLeft="40dp"
-                android:background="@drawable/borde"
-                android:paddingLeft="8dp"
-                android:paddingTop="5dp"
-                android:paddingRight="12dp"
-                android:paddingBottom="5dp"
-                android:text="N Paquetes"
-                android:textColor="#000000"
-                android:textSize="15dp"
-                android:layout_weight="1"/>
-        </TableRow>
-    </TableLayout>
+            android:layout_toLeftOf="@+id/btMasInfo"
+            android:layout_alignParentLeft="true"
+            android:padding="10sp"
+            android:text="0 paquetes"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"/>
 
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btMasInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="+ info"
+            android:autoText="true"
+            android:padding="3dp"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+
+    </RelativeLayout>
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="1dp"
+        android:id="@+id/panelUbicacion2"
+        android:background="@color/fbutton_color_carrot">
+
+        <TextView
+            android:id="@+id/tbBarquillasUbicadas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btRestaurar"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:textColor="@color/white"
+            android:padding="3sp"
+            android:text="0 Barquillas"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="1dp"
+        android:id="@+id/panelUbicacion3"
+        android:background="@color/fbutton_color_carrot">
+
+        <TextView
+            android:id="@+id/tbUtillajesUbicados"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btRestaurar"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:textColor="@color/white"
+            android:padding="3sp"
+            android:text="0 Utillajes"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
 </LinearLayout>

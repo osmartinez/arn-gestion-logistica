@@ -15,4 +15,5 @@ enum class Tipo {
     IP,
     Maquina,
     Barquilla,
+    Utillaje,
 }

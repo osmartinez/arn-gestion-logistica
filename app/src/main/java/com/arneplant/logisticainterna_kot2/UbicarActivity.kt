@@ -1,26 +1,169 @@
 package com.arneplant.logisticainterna_kot2
 
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.arneplant.logisticainterna_kot2.adapter.UbicacionAdapter
+import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
+import com.arneplant.logisticainterna_kot2.fragment.LogFragment
+import com.arneplant.logisticainterna_kot2.model.Maquina
+import com.arneplant.logisticainterna_kot2.model.Ubicacion
 import com.arneplant.logisticainterna_kot2.model.UbicacionPaquetes
+import com.arneplant.logisticainterna_kot2.model.dto.UtillajeUbicacion
+import com.arneplant.logisticainterna_kot2.model.dto.UtillajesTallasColeccion
+import com.arneplant.logisticainterna_kot2.network_implementation.MaquinaService
+import com.arneplant.logisticainterna_kot2.network_implementation.UbicacionService
+import com.arneplant.logisticainterna_kot2.network_implementation.UtillajeService
+import com.arneplant.logisticainterna_kot2.util.Tipo
+import com.arneplant.logisticainterna_kot2.util.Utils
+import kotlinx.android.synthetic.main.activity_sacar_de_maquina.*
 import kotlinx.android.synthetic.main.activity_ubicar.*
+import kotlinx.android.synthetic.main.activity_ubicar.frgLog
+import kotlinx.android.synthetic.main.activity_ubicar.lista
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-class UbicarActivity : AppCompatActivity() {
+class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
+     var buzzer: MediaPlayer? = null
     var ubicacionesPaquetes: ArrayList<UbicacionPaquetes> = ArrayList()
+    var ubicacion: UbicacionPaquetes? = null
     var adapter: UbicacionAdapter?= null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ubicar)
         this.title = "Ubicar"
-        // test
-        this.ubicacionesPaquetes.add(UbicacionPaquetes("UBICACION 1", 2))
-        this.ubicacionesPaquetes.add(UbicacionPaquetes("UBICACION 2", 3))
-        //
+        this.buzzer = MediaPlayer.create(this, R.raw.buzzer)
         this.adapter = UbicacionAdapter(this,this.ubicacionesPaquetes)
         this.lista.adapter =this.adapter
+
+    }
+
+    override fun buscadorFragmentCodigoEscaneado(msg: String) {
+        when (Utils.getTipo(msg)) {
+            Tipo.Ubicacion -> {
+                findUbicacion(msg)
+            }
+            Tipo.Maquina->{
+                findMaquina(msg)
+            }
+
+            Tipo.Utillaje->{
+                ubicarUtillaje(msg)
+            }
+        }
+    }
+
+    private fun ubicarUtillaje(cod: String){
+        if(this.ubicacion==null){
+            (frgLog as LogFragment).log("Selecciona una ubicación",false)
+            buzzer?.start()
+
+        }
+        else{
+            val service = UtillajeService()
+            val utillajeUbicacion = UtillajeUbicacion()
+            utillajeUbicacion.codUbicacion = this.ubicacion?.codUbicacion
+            utillajeUbicacion.codigoEtiqueta = cod
+            val call = service.ubicarPorEtiqueta(utillajeUbicacion)
+            call.enqueue(object: Callback<UtillajesTallasColeccion>{
+                override fun onFailure(call: Call<UtillajesTallasColeccion>, t: Throwable) {
+                    (frgLog as LogFragment).log("Error de protocolo",false)
+                    buzzer?.start()
+                }
+
+                override fun onResponse(
+                    call: Call<UtillajesTallasColeccion>,
+                    response: Response<UtillajesTallasColeccion>
+                ) {
+                    if(response.isSuccessful && response.body()!=null){
+                        actualizarUbicacion(response.body()!!)
+                    }
+                    else{
+                        (frgLog as LogFragment).log("Error de respuesta",false)
+                        buzzer?.start()
+                    }
+                }
+
+            })
+        }
+    }
+
+    private fun findMaquina(cod:String){
+        val service = MaquinaService()
+        val call = service.findMaquinaByCodigoEtiqueta(cod)
+
+        call.enqueue(object: Callback<Maquina>{
+            override fun onFailure(call: Call<Maquina>, t: Throwable) {
+                (frgLog as LogFragment).log("Error de protocolo",false)
+                buzzer?.start()
+            }
+
+            override fun onResponse(call: Call<Maquina>, response: Response<Maquina>) {
+                if(response.isSuccessful && response.body()!=null){
+                    findUbicacion(response.body()!!.codUbicacion)
+                }
+                else{
+                    (frgLog as LogFragment).log("Error de respuesta",false)
+                    buzzer?.start()
+                }
+            }
+
+        })
+    }
+
+    private fun findUbicacion(cod: String){
+        val service = UbicacionService()
+        val call = service.getUbicacion(cod)
+        call.enqueue(object: Callback<Ubicacion>{
+            override fun onFailure(call: Call<Ubicacion>, t: Throwable) {
+                (frgLog as LogFragment).log("Error de protocolo",false)
+            }
+
+            override fun onResponse(call: Call<Ubicacion>, response: Response<Ubicacion>) {
+                if(response.isSuccessful && response.body()!=null){
+                    seleccionarUbicacion(response.body()!!)
+                }
+                else{
+                    (frgLog as LogFragment).log("Error de respuesta",false)
+                    buzzer?.start()
+
+                }
+            }
+
+        })
+    }
+
+    private fun actualizarUbicacion(utillajesTallasColeccion: UtillajesTallasColeccion){
+        for(ub in this.ubicacionesPaquetes){
+            if(ub.codUbicacion == utillajesTallasColeccion.codUbicacion){
+                ub.utillajes.add(utillajesTallasColeccion)
+            }
+        }
+        this.adapter?.notifyDataSetChanged()
+    }
+
+    private fun seleccionarUbicacion(ubicacion: Ubicacion){
+        var ubicacionExistente = this.ubicacionesPaquetes.firstOrNull { x -> x.codUbicacion.equals(ubicacion.codUbicacion) }
+
+        if (ubicacionExistente != null) {
+            this.ubicacionesPaquetes.remove(ubicacionExistente)
+            this.ubicacion = ubicacionExistente
+        } else {
+            this.ubicacion = UbicacionPaquetes(ubicacion)
+        }
+
+        for (m in this.ubicacionesPaquetes) {
+            m.isSeleccionada = false
+        }
+
+        this.ubicacion?.isSeleccionada = true
+        this.ubicacionesPaquetes.add(0, this.ubicacion!!)
+
+
+        this.adapter?.notifyDataSetChanged()
     }
 
     fun atras(v:View) {

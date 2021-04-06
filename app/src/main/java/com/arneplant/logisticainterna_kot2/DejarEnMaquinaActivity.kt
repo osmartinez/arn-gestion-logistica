@@ -52,12 +52,6 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         this.buzzerMultioperacion = MediaPlayer.create(this, R.raw.multioperacion)
 
         this.idOperario = Store.ID_OPERARIO
-
-        this.runOnUiThread(Runnable {
-            //Cambiar controles
-        })
-
-
     }
 
     override fun buscadorFragmentCodigoEscaneado(msg: String) {
@@ -65,18 +59,53 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             Tipo.Maquina -> {
                 this.codigoMaquina = msg
             }
-            Tipo.PrePaquete -> {
-                this.programar(msg)
-            }
-            Tipo.PrePaqueteAgrupacion -> {
-                this.programar(msg)
+
+            Tipo.Barquilla->{
+                this.programarBarquilla(msg)
             }
             else -> {
             }
         }
     }
 
-    private fun programar(cod: String) {
+    private fun asignarAMaquina(infos: List<PrepaqueteSeccionDTO>, maquina: Maquina){
+        val idsOrden = infos.map { it.idOrden }
+        val idsOrdenDistinto = infos.map{it.idOrden}.distinct()
+
+        if(idsOrden.size != idsOrdenDistinto.size){
+            Dialogos.mostrarDialogoMultiOperacionAsociar(infos,maquina,::asignarAMaquinaMulti,ctx!!)
+        }
+        else{
+            val idsTareas = infos.map{it.idTarea}.distinct()
+            val idsTareasStr = idsTareas.joinToString(separator = ",")
+            asociarPrepaquete(infos.first(), maquina)
+            asociarTareaEjecucion(
+                idsTareasStr,
+                if (infos.first().agrupacion==null) 0 else infos.first().agrupacion,
+                maquina
+            )
+        }
+    }
+
+    private fun asignarAMaquinaMulti(infos: List<PrepaqueteSeccionDTO>, maquina: Maquina,descripcion:String){
+        val idsOrden = infos.map { it.idOrden }
+        val idsOrdenDistinto = infos.map{it.idOrden}.distinct()
+
+        if(idsOrden.size != idsOrdenDistinto.size){
+            val infosSeleccionados = infos.filter { it.descripcion == descripcion }
+
+            val idsTareas = infosSeleccionados.map{it.idTarea}.distinct()
+            val idsTareasStr = idsTareas.joinToString(separator = ",")
+            asociarPrepaquete(infosSeleccionados.first(), maquina)
+            asociarTareaEjecucion(
+                idsTareasStr,
+                infosSeleccionados.first().agrupacion,
+                maquina
+            )
+        }
+    }
+
+    private fun programarBarquilla(msg: String) {
         if (codigoMaquina == null || codigoMaquina == "") {
             buzzer?.start()
             (frgLog as LogFragment).log("Primero seleccionar una máquina", false)
@@ -95,106 +124,41 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                 override fun onResponse(call: Call<Maquina>, respMaquina: Response<Maquina>) {
                     codigoMaquina = ""
                     if (respMaquina.isSuccessful && respMaquina.body() != null) {
-                        val maquina = respMaquina.body()!!
-                        val servicePrepaquete = PrepaqueteService()
-                        val callPrepaquete =
-                            servicePrepaquete.buscarEnSeccion(cod, maquina?.codSeccion!!)
+                        val servicioOf = OrdenFabricacionService()
+                        val maquinaActual = respMaquina.body()!!
+                        val callInfoBarquilla = servicioOf.buscarInformacionPorBarquillaSeccion(msg,maquinaActual.codSeccion)
 
-
-                        if (maquina?.posicion!! > 0 && maquina?.ipAutomata != null) {
-                            callPrepaquete.enqueue(object : Callback<List<PrepaqueteSeccionDTO>> {
+                        if(maquinaActual.ipAutomata!=null && maquinaActual.posicion>0){
+                            callInfoBarquilla.enqueue(object: Callback<List<PrepaqueteSeccionDTO>>{
                                 override fun onFailure(
                                     call: Call<List<PrepaqueteSeccionDTO>>,
                                     t: Throwable
                                 ) {
-                                    (frgLog as LogFragment).log("Error en la petición", false)
                                     buzzer?.start()
+                                    (frgLog as LogFragment).log("Error protocolo obtener info barquilla", false)
                                 }
 
                                 override fun onResponse(
                                     call: Call<List<PrepaqueteSeccionDTO>>,
                                     response: Response<List<PrepaqueteSeccionDTO>>
                                 ) {
-                                    if (response.body() != null) {
-                                        when {
-                                            response.body()!!.size == 1 -> {
-                                                // 1 operacion 1 of
-                                                asociarPrepaquete(response.body()!![0], maquina)
-                                                asociarTareaEjecucion(
-                                                    response.body()!![0].idTarea.toString(),
-                                                    0,
-                                                    maquina
-                                                )
-                                            }
-
-                                            response.body()!!.size > 1 -> {
-                                                // multioperacion
-                                                data class Key(
-                                                    val codigo: String,
-                                                    val idOperacion: Int
-                                                )
-
-                                                fun PrepaqueteSeccionDTO.toKey() =
-                                                    Key(this.codigo, this.idOperacion)
-
-                                                val gruposOf =
-                                                    response.body()!!.groupBy { it.codigo }
-                                                if (gruposOf.size == 1) {
-                                                    // multioperacion 1 of
-                                                    buzzerMultioperacion?.start()
-                                                    Dialogos.mostrarDialogoMultiOperacionAsociar(
-                                                        gruposOf.toList().first().second,
-                                                        maquina,
-                                                        ::asociarPrepaquete,
-                                                        ctx!!
-                                                    )
-                                                } else {
-                                                    // multioperacion agrupacion
-                                                    var primerGrupo = gruposOf.toList().first()
-                                                    var operaciones =
-                                                        primerGrupo.second.groupBy { it.idOperacion }
-                                                    if (operaciones.size == 1) {
-                                                        // agrupacion simple
-                                                        asociarPrepaquete(
-                                                            primerGrupo.second[0],
-                                                            maquina
-                                                        )
-                                                        asociarTareaEjecucionAgrupacion(
-                                                            gruposOf,
-                                                            maquina
-                                                        )
-                                                    } else {
-                                                        // agrupacion multiple
-                                                        buzzerMultioperacion?.start()
-                                                        Dialogos.mostrarDialogoMultiOperacionAsociar(
-                                                            operaciones.toList().first().second,
-                                                            maquina,
-                                                            ::asociarPrepaquete,
-                                                            ctx!!
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            else -> {
-                                                buzzer?.start()
-                                                (frgLog as LogFragment).log(
-                                                    "Etiqueta no existente",
-                                                    false
-                                                )
-                                            }
-                                        }
+                                    if(response.isSuccessful){
+                                        asignarAMaquina(response.body()!!, maquinaActual)
+                                    }else{
+                                        buzzer?.start()
+                                        (frgLog as LogFragment).log("Error respuesta obtener info barquilla", false)
                                     }
                                 }
 
                             })
-
+                        }
+                        else{
+                            buzzer?.start()
+                            (frgLog as LogFragment).log("Maquina sin programar IPAUTOMATA", false)
                         }
                     }
                 }
-
             })
-
-
         }
     }
 
@@ -224,27 +188,6 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         })
     }
 
-    private fun asociarTareaEjecucionAgrupacion(
-        grupos: Map<String, List<PrepaqueteSeccionDTO>>,
-        maquina: Maquina
-    ) {
-        var agrupacion = 0
-        var listaIdsTareas = HashSet<Int>()
-        for (grupo in grupos) {
-            for (pre in grupo.value) {
-                listaIdsTareas.add(pre.idTarea)
-                agrupacion = pre.agrupacion
-            }
-        }
-        var idsTareas = ""
-        for (id in listaIdsTareas) {
-            idsTareas += "${id},"
-        }
-        idsTareas = idsTareas.dropLast(1)
-
-        asociarTareaEjecucion(idsTareas, agrupacion, maquina)
-    }
-
     private fun asociarPrepaquete(prepaquete: PrepaqueteSeccionDTO, maquina: Maquina) {
         var nombreCliente = prepaquete.nombrecli
         if (nombreCliente.length > 25) {
@@ -266,52 +209,11 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             nombreCliente,
             prepaquete.codigoArticulo,
             prepaquete.productividad,
-            idOperario
+            Store.ID_OPERARIO
         )
 
     }
 
-    /**
-     * Busca una máquina y seguidamente carga todas las tareas programadas
-     * en dicha máquina
-     */
-    private fun findMaquina(cod: String): Maquina? {
-
-        val serviceMaquina = MaquinaService()
-        val callMaquina = serviceMaquina.findMaquinaByCodigoEtiqueta(cod)
-
-        var resp = callMaquina.execute()
-        if (resp.isSuccessful) {
-            return resp.body()
-        }
-
-        return null
-
-    }
-
-    fun obtenerProgramacionMaquina(codMaquina: String) {
-        tareas.clear()
-        adapter?.notifyDataSetChanged()
-        val service = MaquinaService()
-        val call = service.verColaTrabajoPorCodigo(codMaquina)
-        call.enqueue(object : Callback<List<MaquinaColaTrabajo>> {
-            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
-                Dialogos.mostrarDialogoInformacion(t.message ?: "Error en la petición", ctx!!)
-
-            }
-
-            override fun onResponse(
-                call: Call<List<MaquinaColaTrabajo>>,
-                response: Response<List<MaquinaColaTrabajo>>
-            ) {
-                if (response.isSuccessful && response.body() != null) {
-                    tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
-                    adapter?.notifyDataSetChanged()
-                }
-            }
-
-        })
-    }
 
     /**
      * Finaliza el activity
