@@ -6,4 +6,5 @@ object Store {
     var CODIGO_OPERARIO  = ""
     var NOMBRE_OPERARIO = ""
     var ID_OPERARIO = 0
+    var CODSECCIONSELECCIONADA_BUSQUEDA = ""
 }

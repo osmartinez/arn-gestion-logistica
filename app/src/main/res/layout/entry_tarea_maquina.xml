@@ -98,7 +98,6 @@
             android:text="Bajar"
             android:autoText="true"
             android:padding="10dp"
-            android:enabled="false"
             android:backgroundTint="@color/green"
             android:textStyle="bold"
             android:textColor="@color/white" />

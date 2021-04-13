@@ -66,7 +66,4 @@ class ConsumoAdapter (private val context: Context,
         return rowView
     }
 
-    private fun lanzarPopup() {
-
-    }
 }

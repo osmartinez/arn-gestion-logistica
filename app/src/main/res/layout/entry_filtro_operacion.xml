@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <Button
+    xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textAlignment="textStart"
+        android:text="OP"
+        android:layout_margin="2dp"
+        android:textSize="15dp"
+        android:id="@+id/filtro_op"
+    android:fontFamily="monospace"
+        android:maxLines="1"
+    android:paddingLeft="1dp"
+    android:paddingRight="1dp"
+        ></Button>
+

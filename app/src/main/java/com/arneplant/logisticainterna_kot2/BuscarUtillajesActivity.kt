@@ -77,6 +77,11 @@ class BuscarUtillajesActivity : AppCompatActivity(),BuscadorFragmentDelegate {
     }
 
     private fun buscarPorBarquilla(cod: String){
+        this.ubicaciones.clear()
+        this.filtros.clear()
+        adapterFiltros?.notifyDataSetChanged()
+        adapterUbicaciones?.notifyDataSetChanged()
+
         val service = UtillajeService()
         val call = service.buscarUbicacionesPorBarquilla(cod)
         call.enqueue(object: Callback<List<UtillajeUbicacion>>{
@@ -111,8 +116,8 @@ class BuscarUtillajesActivity : AppCompatActivity(),BuscadorFragmentDelegate {
             filtros.add(FiltroUtillaje(pre))
         }
 
-        adapterFiltros?.notifyDataSetInvalidated()
-        adapterUbicaciones?.notifyDataSetInvalidated()
+        adapterFiltros?.notifyDataSetChanged()
+        adapterUbicaciones?.notifyDataSetChanged()
     }
 
     /**

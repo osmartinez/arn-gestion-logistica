@@ -1,5 +1,7 @@
 package com.arneplant.logisticainterna_kot2.model;
 
+import androidx.annotation.NonNull;
+
 public class MaquinaColaTrabajo {
     private int Id;
     private int IdMaquina;
@@ -15,6 +17,15 @@ public class MaquinaColaTrabajo {
     private String Utillaje;
     private String TallaUtillaje;
     private String Modelo;
+    private String CodigoEtiquetaFichada;
+
+    public String getCodigoEtiquetaFichada() {
+        return CodigoEtiquetaFichada;
+    }
+
+    public void setCodigoEtiquetaFichada(String codigoEtiquetaFichada) {
+        CodigoEtiquetaFichada = codigoEtiquetaFichada;
+    }
 
     public String getModelo() {
         return Modelo;
@@ -126,5 +137,11 @@ public class MaquinaColaTrabajo {
 
     public void setIdOperarioPrograma(Integer idOperarioPrograma) {
         IdOperarioPrograma = idOperarioPrograma;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return  this.getPosicion()+" "+this.getCodigoOrden();
     }
 }

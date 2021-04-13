@@ -20,6 +20,8 @@ public class OrdenFabricacionOperacion implements Serializable {
     private int IdOrdenFabricacion;
     private int IdBarquillaContenido;
 
+    private boolean Seleccionado;
+
     private List<OrdenFabricacionOperacionTalla> OrdenFabOperacionesTallas;
 
     public int getID() {
@@ -148,5 +150,13 @@ public class OrdenFabricacionOperacion implements Serializable {
 
     public void setIdOrdenFabricacion(int idOrdenFabricacion) {
         IdOrdenFabricacion = idOrdenFabricacion;
+    }
+
+    public boolean isSeleccionado() {
+        return Seleccionado;
+    }
+
+    public void setSeleccionado(boolean seleccionado) {
+        Seleccionado = seleccionado;
     }
 }

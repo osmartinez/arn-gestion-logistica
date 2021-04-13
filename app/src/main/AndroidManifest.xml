@@ -18,8 +18,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".BuscarUtillajesActivity"
+        <activity android:name=".LocalizarTareaActivity"
             android:windowSoftInputMode="stateHidden"></activity>
+        <activity
+            android:name=".BuscarUtillajesActivity"
+            android:windowSoftInputMode="stateHidden" />
 
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
@@ -30,8 +33,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ModificarPrepaqueteActivity"
-            android:windowSoftInputMode="stateHidden"/>
+        <activity
+            android:name=".ModificarPrepaqueteActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ProgramacionMaquinaActivity"
             android:windowSoftInputMode="stateHidden" />

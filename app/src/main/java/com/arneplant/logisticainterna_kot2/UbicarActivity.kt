@@ -10,6 +10,8 @@ import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.Ubicacion
 import com.arneplant.logisticainterna_kot2.model.UbicacionPaquetes
+import com.arneplant.logisticainterna_kot2.model.dto.Barquillas
+import com.arneplant.logisticainterna_kot2.model.dto.BodyUbicar
 import com.arneplant.logisticainterna_kot2.model.dto.UtillajeUbicacion
 import com.arneplant.logisticainterna_kot2.model.dto.UtillajesTallasColeccion
 import com.arneplant.logisticainterna_kot2.network_implementation.MaquinaService
@@ -49,6 +51,9 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             Tipo.Maquina->{
                 findMaquina(msg)
             }
+            Tipo.Barquilla->{
+                ubicarBarquilla(msg)
+            }
 
             Tipo.Utillaje->{
                 ubicarUtillaje(msg)
@@ -56,9 +61,34 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         }
     }
 
+    private fun ubicarBarquilla(cod: String) {
+        if(this.ubicacion==null){
+            (frgLog as LogFragment).log("Escanea una ubicación",false)
+            buzzer?.start()
+        }
+        else{
+            val service = UbicacionService()
+            val codUbicacion = this.ubicacion?.codUbicacion!!
+            val call = service.ubicarBarquilla(BodyUbicar(cod,codUbicacion))
+            call.enqueue(object:Callback<Void>{
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    (frgLog as LogFragment).log("Error de protocolo",false)
+                    buzzer?.start()
+                }
+
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if(response.isSuccessful){
+                        actualizarUbicacion(cod,codUbicacion)
+                    }
+                }
+
+            })
+        }
+    }
+
     private fun ubicarUtillaje(cod: String){
         if(this.ubicacion==null){
-            (frgLog as LogFragment).log("Selecciona una ubicación",false)
+            (frgLog as LogFragment).log("Escanea una ubicación",false)
             buzzer?.start()
 
         }
@@ -136,10 +166,23 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         })
     }
 
+    private fun actualizarUbicacion(codEtiqueta: String, codUbicacion: String){
+        for(ub in this.ubicacionesPaquetes){
+            if(ub.codUbicacion == codUbicacion){
+                if(ub.barquillas.firstOrNull { x->x.codigoEtiqueta==codEtiqueta } == null){
+                    ub.barquillas.add(Barquillas(codEtiqueta,0,codUbicacion,0))
+                }
+            }
+        }
+        this.adapter?.notifyDataSetChanged()
+    }
+
     private fun actualizarUbicacion(utillajesTallasColeccion: UtillajesTallasColeccion){
         for(ub in this.ubicacionesPaquetes){
             if(ub.codUbicacion == utillajesTallasColeccion.codUbicacion){
-                ub.utillajes.add(utillajesTallasColeccion)
+                if(ub.utillajes.firstOrNull{x->x.codigoEtiqueta == utillajesTallasColeccion.codigoEtiqueta}==null){
+                    ub.utillajes.add(utillajesTallasColeccion)
+                }
             }
         }
         this.adapter?.notifyDataSetChanged()

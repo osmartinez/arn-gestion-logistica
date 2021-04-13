@@ -103,6 +103,14 @@ public class AgrupacionCola{
         }
     }
 
+    public String getCodigoEtiqueta(){
+        if (this.tareas.size() > 0) {
+            return tareas.get(0).getCodigoEtiquetaFichada();
+        } else {
+            return "";
+        }
+    }
+
 
     public float getPares() {
         if (this.tareas.size() > 0) {

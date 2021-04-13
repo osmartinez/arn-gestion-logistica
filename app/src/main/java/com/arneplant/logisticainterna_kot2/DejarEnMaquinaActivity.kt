@@ -77,13 +77,15 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         }
         else{
             val idsTareas = infos.map{it.idTarea}.distinct()
-            val idsTareasStr = idsTareas.joinToString(separator = ",")
             asociarPrepaquete(infos.first(), maquina)
-            asociarTareaEjecucion(
-                idsTareasStr,
-                if (infos.first().agrupacion==null) 0 else infos.first().agrupacion,
-                maquina
-            )
+            for(id in idsTareas){
+                asociarTareaEjecucion(
+                    id,
+                    if (infos.first().agrupacion==null) 0 else infos.first().agrupacion,
+                    maquina
+                )
+            }
+
         }
     }
 
@@ -95,13 +97,16 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             val infosSeleccionados = infos.filter { it.descripcion == descripcion }
 
             val idsTareas = infosSeleccionados.map{it.idTarea}.distinct()
-            val idsTareasStr = idsTareas.joinToString(separator = ",")
+
+            for(id in idsTareas){
+                asociarTareaEjecucion(
+                    id,
+                    infosSeleccionados.first().agrupacion,
+                    maquina
+                )
+            }
             asociarPrepaquete(infosSeleccionados.first(), maquina)
-            asociarTareaEjecucion(
-                idsTareasStr,
-                infosSeleccionados.first().agrupacion,
-                maquina
-            )
+
         }
     }
 
@@ -162,10 +167,10 @@ class DejarEnMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         }
     }
 
-    private fun asociarTareaEjecucion(idsTareas: String, agrupacion: Int, maquina: Maquina) {
+    private fun asociarTareaEjecucion(idTarea: Int, agrupacion: Int, maquina: Maquina) {
         tareas.clear()
         adapter?.notifyDataSetChanged()
-        var asignacion = AsignacionTareaEjecucion(idsTareas, maquina?.id!!, agrupacion, idOperario)
+        var asignacion = AsignacionTareaEjecucion(idTarea, maquina?.id!!, agrupacion, idOperario)
         val servicioMaquina = MaquinaService()
         val call = servicioMaquina.asignarTareaEjecucion(asignacion)
         call.enqueue(object : Callback<List<MaquinaColaTrabajo>> {

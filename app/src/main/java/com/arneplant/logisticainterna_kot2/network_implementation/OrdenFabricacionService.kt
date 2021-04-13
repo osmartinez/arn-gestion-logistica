@@ -5,12 +5,21 @@ import com.arneplant.logisticainterna_kot2.model.Ubicacion
 import com.arneplant.logisticainterna_kot2.model.dto.BodyConsumirOperacionBarquilla
 import com.arneplant.logisticainterna_kot2.model.dto.Consumo
 import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
+import com.arneplant.logisticainterna_kot2.model.dto.UbicacionTarea
 import com.arneplant.logisticainterna_kot2.network.RetrofitInstance
 import com.arneplant.logisticainterna_kot2.network_ifaces.IOrdenFabricacionService
 import com.arneplant.logisticainterna_kot2.network_ifaces.IUbicacionService
 import retrofit2.Call
 
 class OrdenFabricacionService: IOrdenFabricacionService {
+    override fun obtenerOperacionesPorBarquilla(codigoEtiqueta: String): Call<List<OrdenFabricacionOperacion>> {
+        return service.obtenerOperacionesPorBarquilla(codigoEtiqueta)
+    }
+
+    override fun obtenerUbicacionesTareaPorBarquilla(codigoEtiqueta: String,codSeccion :String): Call<List<UbicacionTarea>> {
+        return service.obtenerUbicacionesTareaPorBarquilla(codigoEtiqueta,codSeccion)
+    }
+
     override fun buscarInformacionPorBarquillaSeccion(
         codigoEtiqueta: String,
         codSeccion: String

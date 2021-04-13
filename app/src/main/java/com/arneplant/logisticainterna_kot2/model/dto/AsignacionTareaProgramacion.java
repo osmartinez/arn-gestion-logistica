@@ -1,16 +1,20 @@
 package com.arneplant.logisticainterna_kot2.model.dto;
 
 public class AsignacionTareaProgramacion {
-    private String idsTareas;
+    private int idTarea;
     private int idMaquina;
     private int agrupacion;
+    private int posicion;
     private int idOperarioPrograma;
+    private String codigoEtiqueta;
 
-    public AsignacionTareaProgramacion(String idsTareas, int idMaquina, int agrupacion, int idOperarioPrograma) {
-        this.idsTareas = idsTareas;
+    public AsignacionTareaProgramacion(int idTarea, int idMaquina, int agrupacion,int posicion, int idOperarioPrograma,String codigoEtiqueta) {
+        this.idTarea = idTarea;
         this.idMaquina = idMaquina;
         this.agrupacion = agrupacion;
+        this.posicion = posicion;
         this.idOperarioPrograma = idOperarioPrograma;
+        this.codigoEtiqueta = codigoEtiqueta;
     }
 
     public AsignacionTareaProgramacion() {
@@ -32,12 +36,12 @@ public class AsignacionTareaProgramacion {
         this.agrupacion = agrupacion;
     }
 
-    public String getIdsTareas() {
-        return idsTareas;
+    public int getIdTarea() {
+        return idTarea;
     }
 
-    public void setIdsTareas(String idsTareas) {
-        this.idsTareas = idsTareas;
+    public void setIdTarea(int idTarea) {
+        this.idTarea = idTarea;
     }
 
     public int getIdMaquina() {
@@ -46,5 +50,21 @@ public class AsignacionTareaProgramacion {
 
     public void setIdMaquina(int idMaquina) {
         this.idMaquina = idMaquina;
+    }
+
+    public int getPosicion() {
+        return posicion;
+    }
+
+    public void setPosicion(int posicion) {
+        this.posicion = posicion;
+    }
+
+    public String getCodigoEtiqueta() {
+        return codigoEtiqueta;
+    }
+
+    public void setCodigoEtiqueta(String codigoEtiqueta) {
+        this.codigoEtiqueta = codigoEtiqueta;
     }
 }

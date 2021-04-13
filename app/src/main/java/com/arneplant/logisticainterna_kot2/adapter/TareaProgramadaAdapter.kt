@@ -8,6 +8,7 @@ import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
 import com.arneplant.logisticainterna_kot2.R
 import com.arneplant.logisticainterna_kot2.delegate.DesprogramarDelegate
+import com.arneplant.logisticainterna_kot2.delegate.ReposicionarTareaColaDelegate
 import com.arneplant.logisticainterna_kot2.delegate.RestaurarConsumosDelegate
 import com.arneplant.logisticainterna_kot2.model.TareaPendiente
 import com.arneplant.logisticainterna_kot2.model.UbicacionPaquetes
@@ -18,7 +19,9 @@ import kotlinx.android.synthetic.main.entry_ubicacion_paquetes.view.*
 class TareaProgramadaAdapter (private val context: Context,
                         private val dataSource:List<AgrupacionCola>): BaseAdapter() {
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
     private var delegate: DesprogramarDelegate? =null
+    private var delegateReposicionar: ReposicionarTareaColaDelegate? = null
 
     private var views: ArrayList<View> = ArrayList(dataSource.size)
 
@@ -42,6 +45,10 @@ class TareaProgramadaAdapter (private val context: Context,
         return position
     }
 
+    fun setReposicionDelegate(delegate: ReposicionarTareaColaDelegate){
+        this.delegateReposicionar = delegate
+    }
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val rowView = inflater.inflate(R.layout.entry_tarea_maquina, parent, false)
         this.views.add(position,rowView)
@@ -55,6 +62,18 @@ class TareaProgramadaAdapter (private val context: Context,
         }
         rowView.btEliminar.setOnClickListener {
             delegate?.desprogramar(item)
+        }
+
+        rowView.btSubir.setOnClickListener {
+            if(this.delegateReposicionar!=null){
+                this.delegateReposicionar?.subir(item)
+            }
+        }
+
+        rowView.btBajar.setOnClickListener {
+            if(this.delegateReposicionar!=null){
+                this.delegateReposicionar?.bajar(item)
+            }
         }
 
         //rowView.tbParesPendientes.text = "${item.cantidadPendiente} pares pendientes"
@@ -71,7 +90,4 @@ class TareaProgramadaAdapter (private val context: Context,
         return rowView
     }
 
-    private fun lanzarPopup() {
-
-    }
 }

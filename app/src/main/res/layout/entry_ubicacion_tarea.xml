@@ -1,0 +1,67 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="180dp"
+    android:orientation="vertical"
+    android:padding="0dp" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="MOLDE 100B"
+        android:padding="5dp"
+        android:id="@+id/tbNombreUbicacion"
+        android:textSize="15sp"
+        android:textStyle="bold|italic"
+        android:background="@color/fbutton_color_midnight_blue"
+        android:clickable="true"
+        android:textColor="@color/white" />
+
+    <RelativeLayout
+        android:id="@+id/panel1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:background="@color/fbutton_color_carrot">
+
+        <TextView
+            android:id="@+id/tbNumeroCajas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btMasInfo"
+            android:layout_alignParentLeft="true"
+            android:padding="5sp"
+            android:text="1 caja"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"/>
+
+
+
+    </RelativeLayout>
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:id="@+id/panel2"
+        android:background="@color/fbutton_color_carrot">
+
+        <TextView
+            android:id="@+id/tbPares"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btRestaurar"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="0dp"
+            android:textColor="@color/white"
+            android:padding="5sp"
+            android:text="50 pares"
+            android:textSize="18sp" />
+
+
+
+    </RelativeLayout>
+</LinearLayout>

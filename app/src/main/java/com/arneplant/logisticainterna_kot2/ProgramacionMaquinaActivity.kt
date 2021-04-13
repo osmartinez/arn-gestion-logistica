@@ -7,33 +7,36 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.arneplant.logisticainterna_kot2.adapter.TareaProgramadaAdapter
+import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
 import com.arneplant.logisticainterna_kot2.delegate.DesprogramarDelegate
+import com.arneplant.logisticainterna_kot2.delegate.ReposicionarTareaColaDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.model.MaquinaColaTrabajo
-import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionCola
-import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaEjecucion
-import com.arneplant.logisticainterna_kot2.model.dto.AsignacionTareaProgramacion
-import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
+import com.arneplant.logisticainterna_kot2.model.dto.*
 import com.arneplant.logisticainterna_kot2.network.MqttCliente
 import com.arneplant.logisticainterna_kot2.network_implementation.MaquinaService
+import com.arneplant.logisticainterna_kot2.network_implementation.OrdenFabricacionService
 import com.arneplant.logisticainterna_kot2.network_implementation.PrepaqueteService
+import com.arneplant.logisticainterna_kot2.network_implementation.UbicacionService
 import com.arneplant.logisticainterna_kot2.util.Dialogos
 import com.arneplant.logisticainterna_kot2.util.Tipo
 import com.arneplant.logisticainterna_kot2.util.Utils
+import kotlinx.android.synthetic.main.activity_dejar_en_maquina.*
 import kotlinx.android.synthetic.main.activity_programacion_maquina.frgLog
 import kotlinx.android.synthetic.main.activity_programacion_maquina.lista
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate , DesprogramarDelegate{
+class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
+    DesprogramarDelegate {
 
 
     private var log: LogFragment? = null
-    private var tareas : ArrayList<AgrupacionCola> = ArrayList()
-    private var adapter: TareaProgramadaAdapter?  = null
+    private var tareas: ArrayList<AgrupacionCola> = ArrayList()
+    private var adapter: TareaProgramadaAdapter? = null
     private var maquina: Maquina? = null
     private var ctx: Context? = null
     private var buzzer: MediaPlayer? = null
@@ -43,11 +46,21 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_programacion_maquina)
-        this.adapter = TareaProgramadaAdapter(this,this.tareas)
+        this.adapter = TareaProgramadaAdapter(this, this.tareas)
         this.lista.adapter = this.adapter
         this.title = "Programación Máquina"
         this.log = frgLog as LogFragment
         this.ctx = this
+        this.adapter?.setReposicionDelegate(object : ReposicionarTareaColaDelegate {
+            override fun subir(tarea: AgrupacionCola) {
+                (ctx as ProgramacionMaquinaActivity).subir(tarea)
+            }
+
+            override fun bajar(tarea: AgrupacionCola) {
+                (ctx as ProgramacionMaquinaActivity).bajar(tarea)
+            }
+
+        })
 
         val sharedPref =
             this.getSharedPreferences("MEMORIA_INTERNA", Context.MODE_PRIVATE) ?: return
@@ -76,13 +89,12 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                 findMaquina(msg) // carga - descarga
                 findProgramacionMaquina(msg)
             }
-            Tipo.PrePaquete -> {
-                //intentarAsociar(msg, 0)
+            Tipo.Barquilla -> {
                 programar(msg)
+                ubicar(msg)
             }
-            Tipo.PrePaqueteAgrupacion -> {
-                //intentarAsociar(msg, 1)
-                programar(msg)
+            Tipo.Utillaje -> {
+
             }
             else -> {
             }
@@ -90,149 +102,247 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
         }
     }
 
-    private fun programar(cod: String) {
-        if (this.maquina == null) {
-            Dialogos.mostrarDialogoInformacion("Primero selecciona una maquina", ctx!!)
+    private fun ubicar(cod: String) {
+        if (maquina == null) {
+            buzzer?.start()
+            (frgLog as LogFragment).log("Primero ficha maquina", false)
             return
-        } else {
-            val servicePrepaquete = PrepaqueteService()
-            val callPrepaquete =
-                servicePrepaquete.buscarEnSeccion(cod, this.maquina?.codSeccion!!)
-
-
-            if (this.maquina?.posicion!! > 0 && this.maquina?.ipAutomata != null) {
-                callPrepaquete.enqueue(object : Callback<List<PrepaqueteSeccionDTO>> {
-                    override fun onFailure(
-                        call: Call<List<PrepaqueteSeccionDTO>>,
-                        t: Throwable
-                    ) {
-                        (frgLog as LogFragment).log("Error en la petición", false)
-                        buzzer?.start()
-                    }
-
-                    override fun onResponse(
-                        call: Call<List<PrepaqueteSeccionDTO>>,
-                        response: Response<List<PrepaqueteSeccionDTO>>
-                    ) {
-                        if (response.body() != null) {
-                            when {
-                                response.body()!!.size == 1 -> {
-                                    // simple
-                                    programarPrepaquete(response.body()!![0], maquina!!)
-                                }
-
-                                response.body()!!.size > 1 -> {
-                                    // agrupacion
-                                    data class Key(val codigo: String, val idOperacion: Int)
-
-                                    fun PrepaqueteSeccionDTO.toKey() =
-                                        Key(this.codigo, this.idOperacion)
-
-                                    val gruposOf = response.body()!!.groupBy { it.codigo }
-                                    if (gruposOf.size == 1) {
-                                        // s multi
-                                        buzzerMultioperacion?.start()
-                                        Dialogos.mostrarDialogoMultiOperacionAsociar(
-                                            gruposOf.toList().first().second,
-                                            maquina!!,
-                                            ::programarPrepaquete,
-                                            ctx!!
-                                        )
-                                    } else {
-                                        // varias ofs
-                                        // cojo la primera
-                                        var primerGrupo = gruposOf.toList().first()
-                                        // agrupo sus operaciones
-                                        var operaciones =
-                                            primerGrupo.second.groupBy { it.idOperacion }
-                                        // varias ofs pero con 1 operacion
-                                        if (operaciones.size == 1) {
-                                            // agrupacion simple
-                                            programarPrepaquetes(response.body()!!,maquina!!)
-                                        } else {
-                                            // agrupacion multiple
-                                            // ESTO ESTA MAL HAY QUE CORREGIRLOO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                                            buzzerMultioperacion?.start()
-                                            Dialogos.mostrarDialogoMultiOperacionAsociar(
-                                                operaciones.toList().first().second,
-                                                maquina!!,
-                                                ::programarPrepaquete,
-                                                ctx!!
-                                            )
-                                        }
-                                    }
-                                }
-                                else -> {
-                                    buzzer?.start()
-                                    (frgLog as LogFragment).log("Etiqueta no existente", false)
-                                }
-                            }
-                        }
-                    }
-
-                })
-
-            }
         }
-    }
 
-    private fun programarColaMaquina(idsTareas: String, agrupacion: Int){
-        tareas.clear()
-        adapter?.notifyDataSetChanged()
-        var asignacion = AsignacionTareaProgramacion(idsTareas,maquina?.id!!,agrupacion,idOperario)
-        val servicioMaquina = MaquinaService()
-        val call = servicioMaquina.programarTareaCola(asignacion)
-        call.enqueue(object:Callback<List<MaquinaColaTrabajo>>{
-            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
-
+        val servicioUbicacion = UbicacionService()
+        val call = servicioUbicacion.ubicarBarquilla(BodyUbicar(cod, this.maquina?.codUbicacion))
+        call.enqueue(object : Callback<Void> {
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                buzzer?.start()
+                (frgLog as LogFragment).log("Error protocolo ubicar barquilla", false)
             }
 
-            override fun onResponse(call: Call<List<MaquinaColaTrabajo>>, response: Response<List<MaquinaColaTrabajo>>) {
-                if(response.isSuccessful){
-                    var cola = response.body()!!
-                    MqttCliente.colaMaquinaActualizada(maquina!!,cola,ArrayList())
-                    tareas.addAll(Utils.agruparColaTrabajo(cola))
-                    adapter?.notifyDataSetChanged()
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (!response.isSuccessful) {
+                    buzzer?.start()
+                    (frgLog as LogFragment).log("Error respuesta ubicar", false)
                 }
             }
 
         })
     }
 
-    private fun programarPrepaquete(pre: PrepaqueteSeccionDTO,maquina:Maquina){
-        programarColaMaquina(pre.idTarea.toString(), 0)
+    private fun programar(cod: String) {
+        if (maquina == null) {
+            buzzer?.start()
+            (frgLog as LogFragment).log("Primero ficha maquina", false)
+            return
+        }
+        val servicioOf = OrdenFabricacionService()
+        val serviceMaquina = MaquinaService()
+
+        val maquinaActual = this.maquina
+        val callInfoBarquilla =
+            servicioOf.buscarInformacionPorBarquillaSeccion(cod, maquinaActual!!.codSeccion)
+
+        if (maquinaActual?.ipAutomata != null && maquinaActual?.posicion > 0) {
+            callInfoBarquilla.enqueue(object : Callback<List<PrepaqueteSeccionDTO>> {
+                override fun onFailure(
+                    call: Call<List<PrepaqueteSeccionDTO>>,
+                    t: Throwable
+                ) {
+                    buzzer?.start()
+                    (frgLog as LogFragment).log("Error protocolo obtener info barquilla", false)
+                }
+
+                override fun onResponse(
+                    call: Call<List<PrepaqueteSeccionDTO>>,
+                    response: Response<List<PrepaqueteSeccionDTO>>
+                ) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val infos = response.body()!!
+                        val posNueva =
+                            if (tareas.isEmpty()) 1 else tareas.maxBy { it.posicion }!!.posicion + 1
+                        for (info in infos) {
+                            // programar
+                            val callProgramar = serviceMaquina.programarTareaCola(
+                                AsignacionTareaProgramacion(
+                                    info.idTarea,
+                                    maquina?.id!!,
+                                    if (info.agrupacion == null) 0 else info.agrupacion,
+                                    posNueva,
+                                    Store.ID_OPERARIO,
+                                    cod
+                                )
+
+                            )
+                            callProgramar.enqueue(object : Callback<List<MaquinaColaTrabajo>> {
+                                override fun onFailure(
+                                    call: Call<List<MaquinaColaTrabajo>>,
+                                    t: Throwable
+                                ) {
+                                    buzzer?.start()
+                                    (frgLog as LogFragment).log(
+                                        "Error protocolo obtener info barquilla",
+                                        false
+                                    )
+                                }
+
+                                override fun onResponse(
+                                    call: Call<List<MaquinaColaTrabajo>>,
+                                    response: Response<List<MaquinaColaTrabajo>>
+                                ) {
+                                    MqttCliente.colaMaquinaActualizada(
+                                        maquina!!,
+                                        response.body()!!,
+                                        ArrayList()
+                                    )
+                                    addTrabajos(response.body()!!)
+                                }
+                            })
+                        }
+                    } else {
+                        buzzer?.start()
+                        (frgLog as LogFragment).log("Error respuesta obtener info barquilla", false)
+                    }
+                }
+
+            })
+        }
     }
 
-    private fun programarPrepaquetes(pres: List<PrepaqueteSeccionDTO>, maquina:Maquina){
-        var idsTareas = ""
-        for(pre in pres){
-            idsTareas+= "${pre.idTarea},"
+    private fun addTrabajos(trabajos: List<MaquinaColaTrabajo>) {
+        tareas.clear()
+        tareas.addAll(Utils.agruparColaTrabajo(trabajos))
+        adapter?.notifyDataSetChanged()
+    }
+
+    private fun subir(agrupacion: AgrupacionCola) {
+
+        // restar posicion de las tareas que voy a subir
+        //
+        val posActual = agrupacion.posicion
+
+        val tareasAnteriores = this.tareas.firstOrNull { x -> x.posicion == posActual - 1 }
+        val service = MaquinaService()
+
+        if (tareasAnteriores == null) {
+
+        } else {
+            val nuevaPos = agrupacion.posicion - 1
+
+            val call = service.actualizarPosicionTarea(
+                AsignacionTareaProgramacion(
+                    agrupacion.tareas.first().idTarea,
+                    maquina?.id!!,
+                    agrupacion.tareas.first().agrupacion,
+                    nuevaPos,
+                    Store.ID_OPERARIO,
+                    agrupacion.codigoEtiqueta
+                )
+            )
+
+
+            call.enqueue(object : Callback<List<MaquinaColaTrabajo>> {
+                override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
+                    log!!.log(t.message ?: "Error de protocolo", false)
+                }
+
+                override fun onResponse(
+                    call: Call<List<MaquinaColaTrabajo>>,
+                    response: Response<List<MaquinaColaTrabajo>>
+                ) {
+                    if (response.isSuccessful && response.body() != null) {
+                        MqttCliente.colaMaquinaActualizada(
+                            maquina!!,
+                            response.body()!!,
+                            ArrayList()
+                        )
+
+                        tareas.clear()
+                        tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
+                        adapter?.notifyDataSetChanged()
+
+
+                    }
+                }
+
+            })
+
         }
-        programarColaMaquina(idsTareas, pres.first().agrupacion)
+
+
+    }
+
+    private fun bajar(agrupacion: AgrupacionCola) {
+        // restar posicion de las tareas que voy a subir
+        //
+        val posActual = agrupacion.posicion
+
+        val tareasPosteriores = this.tareas.firstOrNull { x -> x.posicion == posActual + 1 }
+        val service = MaquinaService()
+
+        if (tareasPosteriores == null) {
+        } else {
+            val nuevaPos = agrupacion.posicion + 1
+            val call = service.actualizarPosicionTarea(
+                AsignacionTareaProgramacion(
+                    agrupacion.tareas.first().idTarea,
+                    maquina?.id!!,
+                    agrupacion.tareas.first().agrupacion,
+                    nuevaPos,
+                    Store.ID_OPERARIO,
+                    agrupacion.codigoEtiqueta
+                )
+            )
+
+
+            call.enqueue(object : Callback<List<MaquinaColaTrabajo>> {
+                override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
+                    log!!.log(t.message ?: "Error de protocolo", false)
+                }
+
+                override fun onResponse(
+                    call: Call<List<MaquinaColaTrabajo>>,
+                    response: Response<List<MaquinaColaTrabajo>>
+                ) {
+                    if (response.isSuccessful && response.body() != null) {
+                        MqttCliente.colaMaquinaActualizada(
+                            maquina!!,
+                            response.body()!!,
+                            ArrayList()
+                        )
+
+                        tareas.clear()
+                        tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
+                        adapter?.notifyDataSetChanged()
+
+
+                    }
+                }
+
+            })
+        }
+
+
     }
 
     override fun desprogramar(agrupacion: AgrupacionCola) {
         tareas.clear()
         adapter?.notifyDataSetChanged()
-        var idsTareas = ""
-        for(t in agrupacion.tareas){
-            idsTareas+="${t.idTarea},"
-        }
-        val asignacion = AsignacionTareaEjecucion(idsTareas,maquina?.id!!,agrupacion.agrupacion,0)
         val service = MaquinaService()
-        val call = service.desasignarTareaEjecucion(asignacion)
-        call.enqueue(object: Callback<List<MaquinaColaTrabajo>>{
-            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
 
+        val asignacion =
+            AsignacionTareaEjecucion(agrupacion.tareas.first().idTarea, maquina?.id!!, agrupacion.agrupacion, 0)
+        val call = service.desasignarTareaEjecucion(asignacion)
+        call.enqueue(object : Callback<List<MaquinaColaTrabajo>> {
+            override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
+                log!!.log(t.message ?: "Error de protocolo", false)
             }
 
             override fun onResponse(
                 call: Call<List<MaquinaColaTrabajo>>,
                 response: Response<List<MaquinaColaTrabajo>>
             ) {
-                if(response.isSuccessful && response.body()!=null){
+                if (response.isSuccessful && response.body() != null) {
                     var cola = response.body()!!
-                    MqttCliente.colaMaquinaActualizada(maquina!!,cola,agrupacion.tareas)
+                    MqttCliente.colaMaquinaActualizada(maquina!!, cola, agrupacion.tareas)
+                    tareas.clear()
                     tareas.addAll(Utils.agruparColaTrabajo(cola))
                     adapter?.notifyDataSetChanged()
 
@@ -240,19 +350,22 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
             }
 
         })
+
     }
-    private fun findMaquina(cod: String){
+
+
+    private fun findMaquina(cod: String) {
         val serviceMaquina = MaquinaService()
         val callMaquina = serviceMaquina.findMaquinaByCodigoEtiqueta(cod)
-        callMaquina.enqueue(object: Callback<Maquina>{
+        callMaquina.enqueue(object : Callback<Maquina> {
             override fun onFailure(call: Call<Maquina>, t: Throwable) {
                 log!!.log(t.message ?: "Error en la petición", false)
                 title = "Programación Máquina"
-                maquina= null
+                maquina = null
             }
 
             override fun onResponse(call: Call<Maquina>, response: Response<Maquina>) {
-                if(response.body()!=null){
+                if (response.body() != null) {
                     title = response.body()!!.nombre
                     maquina = response.body()
 
@@ -262,13 +375,13 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
         })
     }
 
-    private fun findProgramacionMaquina(cod: String){
+    private fun findProgramacionMaquina(cod: String) {
         tareas.clear()
         adapter?.notifyDataSetChanged()
 
         val service = MaquinaService()
         val call = service.verColaTrabajoPorCodigo(cod)
-        call.enqueue(object: Callback<List<MaquinaColaTrabajo>> {
+        call.enqueue(object : Callback<List<MaquinaColaTrabajo>> {
             override fun onFailure(call: Call<List<MaquinaColaTrabajo>>, t: Throwable) {
                 log!!.log(t.message ?: "Error en la petición", false)
 
@@ -278,7 +391,8 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
                 call: Call<List<MaquinaColaTrabajo>>,
                 response: Response<List<MaquinaColaTrabajo>>
             ) {
-                if(response.isSuccessful && response.body()!=null){
+                if (response.isSuccessful && response.body() != null) {
+                    tareas.clear()
                     tareas.addAll(Utils.agruparColaTrabajo(response.body()!!))
                     adapter?.notifyDataSetChanged()
                 }
@@ -287,7 +401,7 @@ class ProgramacionMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegat
         })
     }
 
-    fun atras(v: View){
+    fun atras(v: View) {
         this.finish()
     }
 

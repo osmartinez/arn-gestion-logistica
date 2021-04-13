@@ -44,11 +44,11 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
             <info.hoang8f.widget.FButton
-                android:id="@+id/BT_2"
+                android:id="@+id/btLocalizarTarea"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:text=""
+                android:text="BUSCAR&#10;TAREA"
                 android:textColor="@color/white"
                 android:textSize="30sp" />
             <info.hoang8f.widget.FButton

@@ -6,6 +6,8 @@ import java.util.Objects;
 public class Ubicacion implements Serializable {
     private String CodUbicacion;
     private String Descripcion;
+    private boolean EsMaquina;
+    private String CodSeccion;
 
 
     public Ubicacion() {
@@ -40,5 +42,21 @@ public class Ubicacion implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(CodUbicacion);
+    }
+
+    public boolean isEsMaquina() {
+        return EsMaquina;
+    }
+
+    public void setEsMaquina(boolean esMaquina) {
+        EsMaquina = esMaquina;
+    }
+
+    public String getCodSeccion() {
+        return CodSeccion;
+    }
+
+    public void setCodSeccion(String codSeccion) {
+        CodSeccion = codSeccion;
     }
 }

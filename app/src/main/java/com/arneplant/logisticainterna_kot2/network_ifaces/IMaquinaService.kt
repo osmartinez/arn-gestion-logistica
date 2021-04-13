@@ -22,6 +22,9 @@ interface IMaquinaService {
     @POST("api/maquinas/programarTareaCola")
     fun programarTareaCola(@Body asginacion: AsignacionTareaProgramacion): Call<List<MaquinaColaTrabajo>>
 
+    @POST("api/maquinas/actualizarPosicionTarea")
+    fun actualizarPosicionTarea(@Body asginacion: AsignacionTareaProgramacion): Call<List<MaquinaColaTrabajo>>
+
 
     @GET("api/maquinas/colaTrabajo/verPorId")
     fun verColaTrabajoPorId(@Query("idMaquina") idMaquina:Int): Call<List<MaquinaColaTrabajo>>
