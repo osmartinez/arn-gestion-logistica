@@ -8,6 +8,8 @@ public class UbicacionTarea {
     private String Descripcion;
     private boolean EsMaquina;
     private boolean Ejecucion;
+    private double CantidadFabricar;
+    private double CantidadPendiente;
 
     public int getNumCajas() {
         return NumCajas;
@@ -63,5 +65,21 @@ public class UbicacionTarea {
 
     public void setEjecucion(boolean ejecucion) {
         Ejecucion = ejecucion;
+    }
+
+    public double getCantidadFabricar() {
+        return CantidadFabricar;
+    }
+
+    public void setCantidadFabricar(double cantidadFabricar) {
+        CantidadFabricar = cantidadFabricar;
+    }
+
+    public double getCantidadPendiente() {
+        return CantidadPendiente;
+    }
+
+    public void setCantidadPendiente(double cantidadPendiente) {
+        CantidadPendiente = cantidadPendiente;
     }
 }

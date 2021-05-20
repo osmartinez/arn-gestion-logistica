@@ -12,7 +12,6 @@ import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
 import com.arneplant.logisticainterna_kot2.delegate.RestaurarConsumosDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.Maquina
-import com.arneplant.logisticainterna_kot2.model.dto.Consumo
 import com.arneplant.logisticainterna_kot2.util.Dialogos
 import com.arneplant.logisticainterna_kot2.util.Tipo
 import com.arneplant.logisticainterna_kot2.util.Utils
@@ -25,9 +24,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
-import com.arneplant.logisticainterna_kot2.model.dto.BodyConsumirOperacionBarquilla
-import com.arneplant.logisticainterna_kot2.model.dto.Desconsumo
-import com.arneplant.logisticainterna_kot2.model.dto.MaquinaEtiqueta
+import com.arneplant.logisticainterna_kot2.model.dto.*
 import com.arneplant.logisticainterna_kot2.network.MqttCliente
 import com.arneplant.logisticainterna_kot2.network_implementation.*
 import retrofit2.http.Body
@@ -50,16 +47,17 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
     private var buzzerMultioperacion: MediaPlayer? = null
     private var sharedPreferences: SharedPreferences? = null
 
+    private var memoriaConsumo: MemoriaConsumo? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sacar_de_maquina)
 
         this.ctx = this
 
-        if(Store.ID_OPERARIO != 0){
+        if (Store.ID_OPERARIO != 0) {
             this.title = "${Store.CODIGO_OPERARIO} - Sacar de máquina"
-        }
-        else{
+        } else {
             this.finish()
         }
 
@@ -72,6 +70,7 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         this.buzzerMultioperacion = MediaPlayer.create(this, R.raw.multioperacion)
         this.sharedPreferences = this.getSharedPreferences(sharedPrefFile, Context.MODE_PRIVATE)
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_sacar_de_maquina, menu)
@@ -84,6 +83,7 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         itemNotificarNota.isChecked = sharedPreferences?.getBoolean(NOTIFICAR_NOTA, true)!!
         return true
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here.
         val id = item.getItemId()
@@ -124,13 +124,13 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
             Tipo.PrePaquete -> {
                 consumirEtiqueta(msg)
             }
-            Tipo.Barquilla ->{
+            Tipo.Barquilla -> {
                 consumirBarquilla(msg)
             }
         }
     }
 
-    private fun consumirBarquilla(cod:String){
+    private fun consumirBarquilla(cod: String) {
         if (this.maquina == null) {
             Dialogos.mostrarDialogoInformacion("Primero selecciona una máquina", this)
             buzzer?.start()
@@ -142,9 +142,9 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         val serviceOf = OrdenFabricacionService()
         val callOperaciones = serviceOf.buscarOperacionesPorBarquillaSeccion(cod, codSeccion)
 
-        callOperaciones.enqueue(object:Callback<List<OrdenFabricacionOperacion>>{
+        callOperaciones.enqueue(object : Callback<List<OrdenFabricacionOperacion>> {
             override fun onFailure(call: Call<List<OrdenFabricacionOperacion>>, t: Throwable) {
-                (frgLog as LogFragment).log("Error de protocolo",false)
+                (frgLog as LogFragment).log("Error de protocolo", false)
                 buzzer?.start()
             }
 
@@ -152,11 +152,10 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
                 call: Call<List<OrdenFabricacionOperacion>>,
                 response: Response<List<OrdenFabricacionOperacion>>
             ) {
-                if(response.isSuccessful && response.body()!= null){
+                if (response.isSuccessful && response.body() != null) {
                     consumirOperaciones(serviceOf, response.body()!!, idMaquina)
-                }
-                else{
-                    (frgLog as LogFragment).log("Error en la respuesta",false)
+                } else {
+                    (frgLog as LogFragment).log("Error en la respuesta", false)
                     buzzer?.start()
                 }
             }
@@ -165,53 +164,95 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
 
     }
 
-    private fun consumirOperaciones(servicio: OrdenFabricacionService,operaciones: List<OrdenFabricacionOperacion>, idMaquina: Int){
-        var body :BodyConsumirOperacionBarquilla? = null
+    private fun consumirOperaciones(
+        servicio: OrdenFabricacionService,
+        operaciones: List<OrdenFabricacionOperacion>,
+        idMaquina: Int
+    ) {
+        var body: BodyConsumirOperacionBarquilla? = null
 
         var idOrdenes = operaciones.map { it.idOrdenFabricacion }
-        var idOrdenesDistinct = operaciones.map{it.idOrdenFabricacion}.distinct()
+        var idOrdenesDistinct = operaciones.map { it.idOrdenFabricacion }.distinct()
 
 
-        if(idOrdenes.size != idOrdenesDistinct.size){
-            val descripciones = operaciones.map{it.descripcion}.distinct()
-            buzzerMultioperacion?.start()
-            Dialogos.mostrarDialogoMultiOperacion(descripciones,operaciones,servicio,idMaquina,::consumirOperacionesMulti,ctx!!)
-        }
-        else{
-            for(ofo in operaciones){
-                consumirOperacionBarquilla(servicio,BodyConsumirOperacionBarquilla(ofo,Store.ID_OPERARIO,idMaquina))
+        if (idOrdenes.size != idOrdenesDistinct.size) {
+            if (memoriaConsumo == null || (memoriaConsumo != null && memoriaConsumo?.idsOrdenes!!.isNotEmpty() && !idOrdenes.any {
+                    memoriaConsumo?.idsOrdenes!!.contains(
+                        it
+                    )
+                })) {
+                memoriaConsumo = null
+                val descripciones = operaciones.map { it.descripcion }.distinct()
+                buzzerMultioperacion?.start()
+                Dialogos.mostrarDialogoMultiOperacion(
+                    descripciones,
+                    operaciones,
+                    servicio,
+                    idMaquina,
+                    ::consumirOperacionesMulti,
+                    ctx!!
+                )
+            } else {
+                consumirOperacionesMulti(
+                    servicio,
+                    operaciones,
+                    idMaquina,
+                    memoriaConsumo?.descripciones!!
+                )
+            }
+
+        } else {
+            for (ofo in operaciones) {
+                consumirOperacionBarquilla(
+                    servicio,
+                    BodyConsumirOperacionBarquilla(ofo, Store.ID_OPERARIO, idMaquina)
+                )
             }
         }
     }
 
-    private fun consumirOperacionesMulti(servicio: OrdenFabricacionService,operaciones: List<OrdenFabricacionOperacion>, idMaquina: Int, descripcion: String){
-        var body :BodyConsumirOperacionBarquilla? = null
+    private fun consumirOperacionesMulti(
+        servicio: OrdenFabricacionService,
+        operaciones: List<OrdenFabricacionOperacion>,
+        idMaquina: Int,
+        descripciones: ArrayList<String>
+    ) {
+        var body: BodyConsumirOperacionBarquilla? = null
 
         var idOrdenes = operaciones.map { it.idOrdenFabricacion }
-        var idOrdenesDistinct = operaciones.map{it.idOrdenFabricacion}.distinct()
+        var idOrdenesDistinct = operaciones.map { it.idOrdenFabricacion }.distinct()
 
 
-        if(idOrdenes.size != idOrdenesDistinct.size && descripcion!=null){
-            for(ofo in operaciones){
-                if(ofo.descripcion == descripcion){
-                    consumirOperacionBarquilla(servicio,BodyConsumirOperacionBarquilla(ofo,Store.ID_OPERARIO,idMaquina))
+        if (idOrdenes.size != idOrdenesDistinct.size && descripciones.isNotEmpty()) {
+            memoriaConsumo = MemoriaConsumo(ArrayList(idOrdenesDistinct),descripciones)
+            (frgLog as LogFragment).log("Elección memorizada - limpiar para olvidar", true)
+
+            for (ofo in operaciones) {
+                if (descripciones.contains(ofo.descripcion)) {
+                    consumirOperacionBarquilla(
+                        servicio,
+                        BodyConsumirOperacionBarquilla(ofo, Store.ID_OPERARIO, idMaquina)
+                    )
                 }
             }
         }
 
     }
 
-    private fun consumirOperacionBarquilla(servicio: OrdenFabricacionService,body: BodyConsumirOperacionBarquilla){
+    private fun consumirOperacionBarquilla(
+        servicio: OrdenFabricacionService,
+        body: BodyConsumirOperacionBarquilla
+    ) {
         val callConsumo = servicio.consumirBarquillaOperacion(body!!)
-        callConsumo.enqueue(object: Callback<List<Consumo>>{
+        callConsumo.enqueue(object : Callback<List<Consumo>> {
             override fun onFailure(call: Call<List<Consumo>>, t: Throwable) {
-                (frgLog as LogFragment).log("Error en la petición",false)
+                (frgLog as LogFragment).log("Error en la petición", false)
                 buzzer?.start()
             }
 
             override fun onResponse(call: Call<List<Consumo>>, response: Response<List<Consumo>>) {
-                if(response.isSuccessful && response.body()!=null)
-                    consumosRecibidos(body.idMaquina,response.body()!!)
+                if (response.isSuccessful && response.body() != null)
+                    consumosRecibidos(body.idMaquina, response.body()!!)
             }
 
         })
@@ -229,14 +270,22 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         val serviceTarea = TareaProgramadaService()
         val serviceOf = OrdenFabricacionService()
 
-        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta, msg,0,Store.ID_OPERARIO))
-        val callOperaciones = serviceOf.buscarOperacionesPorPrepaqueteMaquina(msg, this.maquina?.codigoEtiqueta!!)
+        val callTarea = serviceTarea.consumirEnMaquina(
+            MaquinaEtiqueta(
+                this.maquina?.codigoEtiqueta,
+                msg,
+                0,
+                Store.ID_OPERARIO
+            )
+        )
+        val callOperaciones =
+            serviceOf.buscarOperacionesPorPrepaqueteMaquina(msg, this.maquina?.codigoEtiqueta!!)
 
         val idMaquina = this.maquina!!.id
 
-        callOperaciones.enqueue(object:Callback<List<OrdenFabricacionOperacion>>{
+        callOperaciones.enqueue(object : Callback<List<OrdenFabricacionOperacion>> {
             override fun onFailure(call: Call<List<OrdenFabricacionOperacion>>, t: Throwable) {
-                (frgLog as LogFragment).log("Error en la petición",false)
+                (frgLog as LogFragment).log("Error en la petición", false)
                 buzzer?.start()
             }
 
@@ -244,31 +293,40 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
                 call: Call<List<OrdenFabricacionOperacion>>,
                 response: Response<List<OrdenFabricacionOperacion>>
             ) {
-                if(response.body()!=null){
+                if (response.body() != null) {
                     when {
-                        response.body()!!.size == 1 -> callTarea.enqueue(object : Callback<List<Consumo>> {
+                        response.body()!!.size == 1 -> callTarea.enqueue(object :
+                            Callback<List<Consumo>> {
                             override fun onFailure(call: Call<List<Consumo>>, t: Throwable) {
-                                (frgLog as LogFragment).log("Error en la petición",false)
+                                (frgLog as LogFragment).log("Error en la petición", false)
                                 buzzer?.start()
                             }
 
-                            override fun onResponse(call: Call<List<Consumo>>, response: Response<List<Consumo>>) {
+                            override fun onResponse(
+                                call: Call<List<Consumo>>,
+                                response: Response<List<Consumo>>
+                            ) {
                                 if (response.body() != null) {
                                     consumosRecibidos(idMaquina, response.body()!!)
                                 } else {
                                     buzzer?.start()
-                                    (frgLog as LogFragment).log("Respuesta == null",false)
+                                    (frgLog as LogFragment).log("Respuesta == null", false)
                                 }
                             }
 
                         })
-                        response.body()!!.size>1 -> {
+                        response.body()!!.size > 1 -> {
                             buzzerMultioperacion?.start()
-                            Dialogos.mostrarDialogoMultiOperacion(response.body()!!, ::consumirOperacion,msg, ctx!!)
+                            Dialogos.mostrarDialogoMultiOperacion(
+                                response.body()!!,
+                                ::consumirOperacion,
+                                msg,
+                                ctx!!
+                            )
                         }
                         else -> {
                             buzzer?.start()
-                            (frgLog as LogFragment).log("Etiqueta no existente",false)
+                            (frgLog as LogFragment).log("Etiqueta no existente", false)
                         }
                     }
                 }
@@ -279,15 +337,25 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
 
     }
 
-    private fun consumirOperacion(operacion: OrdenFabricacionOperacion,codigoEtiqueta:String):Unit{
+    private fun consumirOperacion(
+        operacion: OrdenFabricacionOperacion,
+        codigoEtiqueta: String
+    ): Unit {
 
         val serviceTarea = TareaProgramadaService()
-        val callTarea = serviceTarea.consumirEnMaquina(MaquinaEtiqueta(this.maquina?.codigoEtiqueta,codigoEtiqueta, operacion.id, Store.ID_OPERARIO))
+        val callTarea = serviceTarea.consumirEnMaquina(
+            MaquinaEtiqueta(
+                this.maquina?.codigoEtiqueta,
+                codigoEtiqueta,
+                operacion.id,
+                Store.ID_OPERARIO
+            )
+        )
         val idMaquina = this.maquina!!.id
 
         callTarea.enqueue(object : Callback<List<Consumo>> {
             override fun onFailure(call: Call<List<Consumo>>, t: Throwable) {
-                (frgLog as LogFragment).log("Error en la petición",false)
+                (frgLog as LogFragment).log("Error en la petición", false)
                 buzzer?.start()
             }
 
@@ -332,7 +400,7 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
      * lo comunica con un buzzer y un mensaje en la barra de notificacion inferior
      */
     private fun consumosRecibidos(idMaquina: Int, consumos: List<Consumo>) {
-        if(consumos==null || consumos.isEmpty()){
+        if (consumos == null || consumos.isEmpty()) {
             buzzer?.start()
             log!!.log("Lectura repetida", false)
             return
@@ -347,25 +415,23 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
 
         for (consumo in consumos) {
             MqttCliente.consumirTarea(consumo)
-            if(consumo.estado == 0 ||consumo.estado == 1){
+            if (consumo.estado == 0 || consumo.estado == 1) {
                 consumosTareasAcabadas.add(consumo)
-            }
-            else if(consumo.estado == 3){
+            } else if (consumo.estado == 3) {
                 consumosNotasAcabadas.add(consumo)
             }
         }
 
-        if(consumosNotasAcabadas.size > 0){
+        if (consumosNotasAcabadas.size > 0) {
             buzzerNotaAcabada?.start()
-            if(notificarnota){
+            if (notificarnota) {
                 var notas = ""
-                for(c in consumosNotasAcabadas){
-                    notas+=c.codigoOrden+", "
+                for (c in consumosNotasAcabadas) {
+                    notas += c.codigoOrden + ", "
                 }
-                Dialogos.mostrarDialogoInformacion("Has acabado las notas: $notas",ctx!!)
+                Dialogos.mostrarDialogoInformacion("Has acabado las notas: $notas", ctx!!)
             }
-        }
-        else if(consumosTareasAcabadas.size > 0){
+        } else if (consumosTareasAcabadas.size > 0) {
             buzzerTareaAcabada?.start()
             if (notificartarea) {
                 Dialogos.mostrarDialogoTareasAcabadas(this, consumosTareasAcabadas)
@@ -408,19 +474,20 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         this.adapter?.notifyDataSetChanged()
     }
 
-    override fun desconsumir(maq:Maquina){
-        for(consumo in maq.consumos){
+    override fun desconsumir(maq: Maquina) {
+        for (consumo in maq.consumos) {
             val service = TareaProgramadaService()
-            val call = service.desconsumirEtiqueta(Desconsumo(consumo.codPrepaquete,consumo.idOperacion))
+            val call =
+                service.desconsumirEtiqueta(Desconsumo(consumo.codPrepaquete, consumo.idOperacion))
             call.enqueue(object : Callback<Void> {
                 override fun onFailure(call: Call<Void>, t: Throwable) {
-                    (frgLog as LogFragment).log("Error en la petición",false)
+                    (frgLog as LogFragment).log("Error en la petición", false)
                 }
 
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                    if(response.isSuccessful){
+                    if (response.isSuccessful) {
                         maq.consumos.remove(consumo)
-                        if(maq.consumos.isEmpty()){
+                        if (maq.consumos.isEmpty()) {
                             maquinas.remove(maq)
                             adapter?.notifyDataSetChanged()
                         }
@@ -446,5 +513,6 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         this.maquina = null
         this.maquinas.clear()
         this.adapter?.notifyDataSetChanged()
+        this.memoriaConsumo = null
     }
 }

@@ -14,6 +14,8 @@ public class UbicacionPaquetes {
     private String codUbicacion;
     private String nombreUbicacion;
     private boolean seleccionada;
+    private boolean esMaquina;
+    private String codSeccion;
     private ArrayList<UtillajesTallasColeccion> utillajes;
     private ArrayList<Barquillas> barquillas;
     private ArrayList<Paquetes> paquetes;
@@ -24,6 +26,8 @@ public class UbicacionPaquetes {
         this.utillajes = new ArrayList();
         this.barquillas = new ArrayList();
         this.paquetes =  new ArrayList();
+        this.esMaquina = ub.isEsMaquina();
+        this.codSeccion = ub.getCodSeccion();
     }
 
     public UbicacionPaquetes(String nombre){
@@ -79,6 +83,22 @@ public class UbicacionPaquetes {
 
     public void setSeleccionada(boolean seleccionada) {
         this.seleccionada = seleccionada;
+    }
+
+    public boolean isEsMaquina() {
+        return esMaquina;
+    }
+
+    public void setEsMaquina(boolean esMaquina) {
+        this.esMaquina = esMaquina;
+    }
+
+    public String getCodSeccion() {
+        return codSeccion;
+    }
+
+    public void setCodSeccion(String codSeccion) {
+        this.codSeccion = codSeccion;
     }
 
     @Override

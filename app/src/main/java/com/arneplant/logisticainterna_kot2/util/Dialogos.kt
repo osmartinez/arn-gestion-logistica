@@ -27,7 +27,7 @@ import com.arneplant.logisticainterna_kot2.network_implementation.OrdenFabricaci
 
 object Dialogos {
 
-    fun mostrarDialogoMultiOperacion(descripciones: List<String>, operaciones:List<OrdenFabricacionOperacion>, servicio: OrdenFabricacionService,idMaquina:Int, choiceFunction: (servicio: OrdenFabricacionService,operaciones: List<OrdenFabricacionOperacion>, idMaquina: Int, descripcion:String)->Unit, ctx:Context){
+    fun mostrarDialogoMultiOperacion(descripciones: List<String>, operaciones:List<OrdenFabricacionOperacion>, servicio: OrdenFabricacionService,idMaquina:Int, choiceFunction: (servicio: OrdenFabricacionService,operaciones: List<OrdenFabricacionOperacion>, idMaquina: Int, descripcion:ArrayList<String>)->Unit, ctx:Context){
         var dialog: Dialog = Dialog(ctx)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         if(dialog.window != null){
@@ -58,10 +58,33 @@ object Dialogos {
             params.bottomMargin =60
             btn.setLayoutParams(params)
 
-            btn.setOnClickListener { choiceFunction(servicio,operaciones,idMaquina,operacion); dialog.dismiss()  }
+
+            btn.setOnClickListener {
+                val descripciones = ArrayList<String>()
+                descripciones.add(operacion)
+                choiceFunction(servicio,operaciones,idMaquina,descripciones);
+                dialog.dismiss()  }
             dialog.panelBotones.addView(btn)
             i++
         }
+
+        var btn= Button(ctx);
+        btn.setTextColor(Color.WHITE)
+        btn.setBackgroundColor(Color.BLACK)
+        btn.setText("- TODO -")
+        val params =  LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        params.bottomMargin =60
+        btn.setLayoutParams(params)
+
+        btn.setOnClickListener {
+            val descripciones = ArrayList( operaciones.map { it.descripcion })
+            choiceFunction(servicio,operaciones,idMaquina,descripciones);
+            dialog.dismiss()  }
+        dialog.panelBotones.addView(btn)
+
     }
 
     fun mostrarDialogoMultiOperacion(operaciones: List<OrdenFabricacionOperacion> ,choiceFunction: (operacion:OrdenFabricacionOperacion, codigoEtiqueta: String)->Unit,codigoEtiqueta:String, ctx:Context){

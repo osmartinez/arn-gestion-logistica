@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
 import com.arneplant.logisticainterna_kot2.R
-import com.arneplant.logisticainterna_kot2.delegate.FiltroOperacionCambiadoDelegate
-import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
 import com.arneplant.logisticainterna_kot2.model.dto.UbicacionTarea
-import kotlinx.android.synthetic.main.entry_filtro_operacion.view.*
 import kotlinx.android.synthetic.main.entry_ubicacion_tarea.view.*
 
 class TareaUbicacionAdapter (private val context: Context,
@@ -38,24 +35,29 @@ class TareaUbicacionAdapter (private val context: Context,
         return position
     }
 
-
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val rowView = inflater.inflate(R.layout.entry_ubicacion_tarea, parent, false)
         this.views.add(position,rowView)
         var item = getItem(position) as UbicacionTarea
         rowView.tbNombreUbicacion.text = "<${item.talla}> ${item.descripcion.replace("ESPUMA","")}"
         rowView.tbNumeroCajas.text = if(item.numCajas==1) "1 caja" else "${item.numCajas} cajas"
-        rowView.tbPares.text = "${item.cantidad} pares"
-        if(item.isEjecucion){
-            rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
-            rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
+        rowView.tbPares.text = "${item.cantidad.toInt()} pares"
+        rowView.tbParesPendientesTarea.text = "faltan ${item.cantidadPendiente.toInt()}"
+
+        if(item.isEsMaquina){
+            if(item.isEjecucion){
+                rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
+                rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
+            }
+            else{
+                rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
+                rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
+            }
         }
         else{
-            rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
-            rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.orange))
+            rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.lightBlue))
+            rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.lightBlue))
         }
-
 
         return rowView
     }
