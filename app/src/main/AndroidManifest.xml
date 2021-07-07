@@ -44,7 +44,8 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".SacarDeMaquinaActivity"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            />
         <activity
             android:name=".DejarEnMaquinaActivity"
             android:windowSoftInputMode="stateHidden" />

@@ -24,7 +24,7 @@ class PrimerTabFragment: Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.tab1_fragment, container, false)
 
-        view.btProgramar.setOnClickListener { verProgramacion() }
+        view.btLocalizarTarea.setOnClickListener { localizarTarea() }
         view.btDejarMAquina.setOnClickListener { dejarEnMaquina() }
         view.btSacarMaquina.setOnClickListener { sacarDeMaquina() }
         view.btUbicar.setOnClickListener { ubicar() }
@@ -50,15 +50,14 @@ class PrimerTabFragment: Fragment() {
         startActivity(intent)
     }
 
-    fun verProgramacion(){
-        val intent = Intent(activity, ProgramacionMaquinaActivity::class.java)
-        startActivity(intent)
-    }
-
     fun editarEtiqueta(){
         val intent = Intent(activity, ModificarPrepaqueteActivity::class.java)
         startActivity(intent)
     }
+
+    private fun localizarTarea() {
+        val intent = Intent(activity, LocalizarTareaActivity::class.java)
+        startActivity(intent)    }
 
     fun salir(){
 

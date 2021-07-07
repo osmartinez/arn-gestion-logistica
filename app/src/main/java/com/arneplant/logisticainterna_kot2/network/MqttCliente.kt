@@ -57,6 +57,17 @@ object MqttCliente {
         publicar(msg,topic,1)
     }
 
+    fun ubicar(codigoEntidad:String, codigoUbicacion: String){
+        val topic = "/ubicacion"
+        val msg = """
+            {
+            "CodigoEntidad": "${codigoEntidad}",
+            "CodigoUbicacion": "${codigoUbicacion}"
+            }
+        """.trimIndent()
+        publicar(msg,topic,1)
+    }
+
     fun consumirTarea(consumo: Consumo){
         val topic = "/ordenFabricacion/${consumo.idOrden}/${consumo.codSeccion}/consumo"
         val msg = """

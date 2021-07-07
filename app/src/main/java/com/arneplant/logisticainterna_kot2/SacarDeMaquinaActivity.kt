@@ -15,18 +15,19 @@ import com.arneplant.logisticainterna_kot2.model.Maquina
 import com.arneplant.logisticainterna_kot2.util.Dialogos
 import com.arneplant.logisticainterna_kot2.util.Tipo
 import com.arneplant.logisticainterna_kot2.util.Utils
-import kotlinx.android.synthetic.main.activity_sacar_de_maquina.frgLog
-import kotlinx.android.synthetic.main.activity_sacar_de_maquina.lista
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import android.view.Menu
 import android.view.MenuItem
+import android.view.WindowManager
 import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
 import com.arneplant.logisticainterna_kot2.model.dto.*
 import com.arneplant.logisticainterna_kot2.network.MqttCliente
 import com.arneplant.logisticainterna_kot2.network_implementation.*
+import kotlinx.android.synthetic.main.activity_sacar_de_maquina.*
+import kotlinx.android.synthetic.main.principal_fragment.view.*
 import retrofit2.http.Body
 
 
@@ -61,6 +62,9 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
             this.finish()
         }
 
+        (this as AppCompatActivity).setSupportActionBar(sacar_maquina_toolbar)
+
+
         this.adapter = ConsumoMaquinaAdapter(this, maquinas)
         this.lista.adapter = this.adapter
         this.log = frgLog as LogFragment
@@ -69,6 +73,7 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
         this.buzzerTareaAcabada = MediaPlayer.create(this, R.raw.tareacompletada)
         this.buzzerMultioperacion = MediaPlayer.create(this, R.raw.multioperacion)
         this.sharedPreferences = this.getSharedPreferences(sharedPrefFile, Context.MODE_PRIVATE)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

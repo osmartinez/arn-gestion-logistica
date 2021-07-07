@@ -26,14 +26,16 @@ class SegundoTabFragment: Fragment() {
 
         view.btImprimirHojaProduccion.setOnClickListener { MqttCliente.imprimirHojaProduccion(Store.ID_OPERARIO) }
         view.btBuscarUtillaje.setOnClickListener { buscarUtillaje() }
-        view.btLocalizarTarea.setOnClickListener { localizarTarea() }
+        view.btProgramar.setOnClickListener {verProgramacion() }
 
         return view
     }
 
-    private fun localizarTarea() {
-        val intent = Intent(activity, LocalizarTareaActivity::class.java)
-        startActivity(intent)    }
+
+    fun verProgramacion(){
+        val intent = Intent(activity, ProgramacionMaquinaActivity::class.java)
+        startActivity(intent)
+    }
 
     fun buscarUtillaje(){
         val intent = Intent(activity, BuscarUtillajesActivity::class.java)

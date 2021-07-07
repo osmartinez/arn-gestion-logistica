@@ -22,7 +22,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
+class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
 
     private var buzzer: MediaPlayer? = null
@@ -31,7 +31,7 @@ class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
     private val operaciones = ArrayList<OrdenFabricacionOperacion>()
     private val ubicaciones = ArrayList<UbicacionTarea>()
 
-    private var adaptadorFiltros: OperacionesBarquillaAdapter? =null
+    private var adaptadorFiltros: OperacionesBarquillaAdapter? = null
     private var adaptadorUbicaciones: TareaUbicacionAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,10 +39,10 @@ class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
         setContentView(R.layout.activity_localizar_tarea)
         this.buzzer = MediaPlayer.create(this, R.raw.buzzer)
 
-        this.adaptadorFiltros = OperacionesBarquillaAdapter(this,operaciones)
-        this.adaptadorUbicaciones = TareaUbicacionAdapter(this,ubicaciones)
+        this.adaptadorFiltros = OperacionesBarquillaAdapter(this, operaciones)
+        this.adaptadorUbicaciones = TareaUbicacionAdapter(this, ubicaciones)
 
-        this.adaptadorFiltros?.setFiltroCambiadoListener(object: FiltroOperacionCambiadoDelegate{
+        this.adaptadorFiltros?.setFiltroCambiadoListener(object : FiltroOperacionCambiadoDelegate {
             override fun seccionSeleccionada(codSeccion: String) {
                 Store.CODSECCIONSELECCIONADA_BUSQUEDA = codSeccion
             }
@@ -53,10 +53,9 @@ class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
     }
 
 
-
     override fun buscadorFragmentCodigoEscaneado(msg: String) {
-        when(Utils.getTipo(msg)){
-            Tipo.Barquilla->{
+        when (Utils.getTipo(msg)) {
+            Tipo.Barquilla -> {
                 findOperacionesPorBarquilla(msg)
                 findTareaPorBarquilla(msg)
             }
@@ -68,7 +67,7 @@ class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
         adaptadorFiltros?.notifyDataSetChanged()
         val service = OrdenFabricacionService()
         val call = service.obtenerOperacionesPorBarquilla(msg)
-        call.enqueue(object:Callback<List<OrdenFabricacionOperacion>>{
+        call.enqueue(object : Callback<List<OrdenFabricacionOperacion>> {
             override fun onFailure(call: Call<List<OrdenFabricacionOperacion>>, t: Throwable) {
                 buzzer?.start()
                 (frgLog as LogFragment).log("Error de protocolo", false)
@@ -78,22 +77,21 @@ class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
                 call: Call<List<OrdenFabricacionOperacion>>,
                 response: Response<List<OrdenFabricacionOperacion>>
             ) {
-                if(response.isSuccessful && response.body()!=null){
+                if (response.isSuccessful && response.body() != null) {
                     operaciones.clear()
 
-                    var ops =response.body()!!
+                    var ops = response.body()!!
                     var agrupadas = ops.groupBy { it.codSeccion }
                     var filtros = ArrayList<OrdenFabricacionOperacion>()
-                    for(grupo in agrupadas){
+                    for (grupo in agrupadas) {
                         filtros.add(grupo.value.first())
-                        if(grupo.value.first().codSeccion == Store.CODSECCIONSELECCIONADA_BUSQUEDA){
+                        if (grupo.value.first().codSeccion == Store.CODSECCIONSELECCIONADA_BUSQUEDA) {
                             grupo.value.first().isSeleccionado = true
                         }
                     }
                     operaciones.addAll(filtros)
                     adaptadorFiltros?.notifyDataSetChanged()
-                }
-                else{
+                } else {
                     buzzer?.start()
                     (frgLog as LogFragment).log("Error en la respuesta", false)
                 }
@@ -105,20 +103,23 @@ class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
     private fun findTareaPorBarquilla(msg: String) {
         ubicaciones.clear()
         adaptadorUbicaciones?.notifyDataSetChanged()
-        if(Store.CODSECCIONSELECCIONADA_BUSQUEDA== null ||Store.CODSECCIONSELECCIONADA_BUSQUEDA == ""){
+        if (Store.CODSECCIONSELECCIONADA_BUSQUEDA == null || Store.CODSECCIONSELECCIONADA_BUSQUEDA == "") {
             buzzer?.start()
             (frgLog as LogFragment).log("Selecciona una operación primero", false)
             return
-        }
-        else{
-            (frgLog as LogFragment).log("Buscando en sección "+Store.CODSECCIONSELECCIONADA_BUSQUEDA, true)
+        } else {
+            (frgLog as LogFragment).log(
+                "Buscando en sección " + Store.CODSECCIONSELECCIONADA_BUSQUEDA,
+                true
+            )
 
         }
 
 
         val service = OrdenFabricacionService()
-        val call = service.obtenerUbicacionesTareaPorBarquilla(msg,Store.CODSECCIONSELECCIONADA_BUSQUEDA)
-        call.enqueue(object:Callback<List<UbicacionTarea>>{
+        val call =
+            service.obtenerUbicacionesTareaPorBarquilla(msg, Store.CODSECCIONSELECCIONADA_BUSQUEDA)
+        call.enqueue(object : Callback<List<UbicacionTarea>> {
             override fun onFailure(call: Call<List<UbicacionTarea>>, t: Throwable) {
                 buzzer?.start()
                 (frgLog as LogFragment).log("Error de protocolo", false)
@@ -128,14 +129,26 @@ class LocalizarTareaActivity : AppCompatActivity(),BuscadorFragmentDelegate {
                 call: Call<List<UbicacionTarea>>,
                 response: Response<List<UbicacionTarea>>
             ) {
-                if(response.isSuccessful && response.body()!=null){
+                if (response.isSuccessful && response.body() != null) {
                     ubicaciones.clear()
                     var ubs = response.body()!!
                     ubs = ubs.sortedBy { it.isEjecucion }
+
+                    var ejecucionUbs = ubs.filter { x -> x.isEjecucion }
+                    for (ub in ejecucionUbs) {
+                        ubs = ubs.dropWhile { x->
+                            !x.isEjecucion &&
+                                    x.codUbicacion == ub.codUbicacion &&
+                                    x.cantidad == ub.cantidad &&
+                                    x.numCajas == ub.numCajas &&
+                                    x.talla == ub.talla
+                        }
+                    }
+
                     ubicaciones.addAll(ubs)
+
                     adaptadorUbicaciones?.notifyDataSetChanged()
-                }
-                else{
+                } else {
                     buzzer?.start()
                     (frgLog as LogFragment).log("Error en la respuesta", false)
                 }

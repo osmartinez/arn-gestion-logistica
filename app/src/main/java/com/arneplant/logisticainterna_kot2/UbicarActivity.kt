@@ -78,6 +78,7 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if (response.isSuccessful) {
                         actualizarUbicacion(cod, codUbicacion)
+                        MqttCliente.ubicar(cod,codUbicacion)
                     }
                 }
             })
@@ -176,6 +177,7 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
             buzzer?.start()
 
         } else {
+            val codUbicacion = this.ubicacion?.codUbicacion!!
             val service = UtillajeService()
             val utillajeUbicacion = UtillajeUbicacion()
             utillajeUbicacion.codUbicacion = this.ubicacion?.codUbicacion
@@ -193,6 +195,7 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                 ) {
                     if (response.isSuccessful && response.body() != null) {
                         actualizarUbicacion(response.body()!!)
+                        MqttCliente.ubicar(cod,codUbicacion)
                     } else {
                         (frgLog as LogFragment).log("Error de respuesta", false)
                         buzzer?.start()

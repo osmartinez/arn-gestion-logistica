@@ -4,12 +4,52 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SacarDeMaquinaActivity">
+    tools:context=".SacarDeMaquinaActivity"
+    >
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:stretchColumns="0">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/sacar_maquina_toolbar"
+                style="@style/Widget.Shrine.Toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    >
 
+                    <ImageButton
+                        android:id="@+id/settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/ic_settings_black_24dp"
+                        android:layout_marginRight="20dp"/>
+
+                    <ImageView
+                        android:id="@+id/person_icon"
+                        android:layout_toRightOf="@id/settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_person_black_24dp"/>
+                    <TextView
+                        android:id="@+id/userName"
+                        android:layout_toRightOf="@id/person_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="20sp"
+                        android:layout_marginLeft="3dp"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
+
+            </androidx.appcompat.widget.Toolbar>
+        </TableRow>
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
