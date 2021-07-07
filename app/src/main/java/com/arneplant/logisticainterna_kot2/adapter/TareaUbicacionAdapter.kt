@@ -7,11 +7,13 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
 import com.arneplant.logisticainterna_kot2.R
+import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionCola
+import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionUbicacionTarea
 import com.arneplant.logisticainterna_kot2.model.dto.UbicacionTarea
 import kotlinx.android.synthetic.main.entry_ubicacion_tarea.view.*
 
 class TareaUbicacionAdapter (private val context: Context,
-                                   private val dataSource:List<UbicacionTarea>): BaseAdapter() {
+                                   private val dataSource:List<AgrupacionUbicacionTarea>): BaseAdapter() {
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var views: ArrayList<View> = ArrayList(dataSource.size)
 
@@ -38,14 +40,14 @@ class TareaUbicacionAdapter (private val context: Context,
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val rowView = inflater.inflate(R.layout.entry_ubicacion_tarea, parent, false)
         this.views.add(position,rowView)
-        var item = getItem(position) as UbicacionTarea
-        rowView.tbNombreUbicacion.text = "<${item.talla}> ${item.descripcion.replace("ESPUMA","")}"
+        var item = getItem(position) as AgrupacionUbicacionTarea
+        rowView.tbNombreUbicacion.text = "${item.ubicacion.replace("ESPUMA","")}"
         rowView.tbNumeroCajas.text = if(item.numCajas==1) "1 caja" else "${item.numCajas} cajas"
-        rowView.tbPares.text = "${item.cantidad.toInt()} pares"
-        rowView.tbParesPendientesTarea.text = "faltan ${item.cantidadPendiente.toInt()}"
+        rowView.tbPares.text = "${item.pares.toInt()} pares"
+        //rowView.tbParesPendientesTarea.text = "faltan ${item.cantidadPendiente.toInt()}"
 
-        if(item.isEsMaquina){
-            if(item.isEjecucion){
+        if(item.esMaquina()){
+            if(item.esEjecucion()){
                 rowView.panel1.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
                 rowView.panel2.setBackgroundColor(ContextCompat.getColor(context, R.color.violet))
             }

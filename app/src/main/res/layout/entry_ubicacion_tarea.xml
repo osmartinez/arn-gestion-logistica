@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/tbNumeroCajas"
             android:padding="5sp"
-            android:text="faltan 2000"
+            android:text=""
             android:textSize="16sp"
             android:textColor="@color/white"
             android:layout_alignParentStart="false"

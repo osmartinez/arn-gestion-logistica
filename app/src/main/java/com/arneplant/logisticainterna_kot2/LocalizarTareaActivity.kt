@@ -11,6 +11,7 @@ import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
 import com.arneplant.logisticainterna_kot2.delegate.FiltroOperacionCambiadoDelegate
 import com.arneplant.logisticainterna_kot2.fragment.LogFragment
 import com.arneplant.logisticainterna_kot2.model.OrdenFabricacionOperacion
+import com.arneplant.logisticainterna_kot2.model.dto.AgrupacionUbicacionTarea
 import com.arneplant.logisticainterna_kot2.model.dto.UbicacionTarea
 import com.arneplant.logisticainterna_kot2.network_implementation.OrdenFabricacionService
 import com.arneplant.logisticainterna_kot2.util.Tipo
@@ -29,7 +30,7 @@ class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
 
     private val operaciones = ArrayList<OrdenFabricacionOperacion>()
-    private val ubicaciones = ArrayList<UbicacionTarea>()
+    private val ubicaciones = ArrayList<AgrupacionUbicacionTarea>()
 
     private var adaptadorFiltros: OperacionesBarquillaAdapter? = null
     private var adaptadorUbicaciones: TareaUbicacionAdapter? = null
@@ -50,6 +51,7 @@ class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         })
         this.listaFiltrosOperaciones.adapter = adaptadorFiltros
         this.listaUbicaciones.adapter = adaptadorUbicaciones
+
     }
 
 
@@ -104,16 +106,18 @@ class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
         ubicaciones.clear()
         adaptadorUbicaciones?.notifyDataSetChanged()
         if (Store.CODSECCIONSELECCIONADA_BUSQUEDA == null || Store.CODSECCIONSELECCIONADA_BUSQUEDA == "") {
-            buzzer?.start()
-            (frgLog as LogFragment).log("Selecciona una operación primero", false)
-            return
-        } else {
+            Store.CODSECCIONSELECCIONADA_BUSQUEDA = "110"
+            //buzzer?.start()
+            //(frgLog as LogFragment).log("Selecciona una operación primero", false)
+            //return
+        }
+        //else {
             (frgLog as LogFragment).log(
                 "Buscando en sección " + Store.CODSECCIONSELECCIONADA_BUSQUEDA,
                 true
             )
 
-        }
+      //  }
 
 
         val service = OrdenFabricacionService()
@@ -145,7 +149,13 @@ class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                         }
                     }
 
-                    ubicaciones.addAll(ubs)
+
+
+                    var agrupadas = ubs.groupBy { x->x.descripcion }
+
+                    for(grupo in agrupadas){
+                        ubicaciones.add(AgrupacionUbicacionTarea(grupo.value))
+                    }
 
                     adaptadorUbicaciones?.notifyDataSetChanged()
                 } else {
