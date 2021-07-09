@@ -37,4 +37,8 @@ public class AgrupacionUbicacionTarea {
     public boolean esEjecucion(){
         return this.ubicaciones.get(0).isEjecucion();
     }
+
+    public String getTalla(){
+        return this.ubicaciones.get(0).getTalla();
+    }
 }

@@ -150,8 +150,12 @@ class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                     }
 
 
-
-                    var agrupadas = ubs.groupBy { x->x.descripcion }
+                    for(maquina in ubs.filter { x->x.isEsMaquina }){
+                        var listaAux = ArrayList<UbicacionTarea>()
+                        listaAux.add(maquina)
+                        ubicaciones.add(AgrupacionUbicacionTarea(listaAux))
+                    }
+                    var agrupadas = ubs.filter { x->!x.isEsMaquina }.groupBy { x->x.descripcion }
 
                     for(grupo in agrupadas){
                         ubicaciones.add(AgrupacionUbicacionTarea(grupo.value))

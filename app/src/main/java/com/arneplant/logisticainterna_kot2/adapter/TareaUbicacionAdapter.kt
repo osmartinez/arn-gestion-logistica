@@ -41,7 +41,12 @@ class TareaUbicacionAdapter (private val context: Context,
         val rowView = inflater.inflate(R.layout.entry_ubicacion_tarea, parent, false)
         this.views.add(position,rowView)
         var item = getItem(position) as AgrupacionUbicacionTarea
-        rowView.tbNombreUbicacion.text = "${item.ubicacion.replace("ESPUMA","")}"
+        var talla = ""
+        if(item.esMaquina()){
+            talla = item.talla
+            talla = "<"+talla+">"
+        }
+        rowView.tbNombreUbicacion.text = "${talla} ${item.ubicacion.replace("ESPUMA","")}"
         rowView.tbNumeroCajas.text = if(item.numCajas==1) "1 caja" else "${item.numCajas} cajas"
         rowView.tbPares.text = "${item.pares.toInt()} pares"
         //rowView.tbParesPendientesTarea.text = "faltan ${item.cantidadPendiente.toInt()}"
