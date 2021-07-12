@@ -1,5 +1,6 @@
 package com.arneplant.logisticainterna_kot2.network_ifaces
 
+import com.arneplant.logisticainterna_kot2.model.dto.AltaEjemplarDTO
 import com.arneplant.logisticainterna_kot2.model.dto.PrepaqueteSeccionDTO
 import com.arneplant.logisticainterna_kot2.model.dto.UtillajeUbicacion
 import com.arneplant.logisticainterna_kot2.model.dto.UtillajesTallasColeccion
@@ -19,4 +20,7 @@ interface IUtillajeService {
     fun buscarUbicacionesPorCodigoUtillaje(@Path ("codUtillaje") codUtillaje: String): Call<List<UtillajeUbicacion>>
     @POST("api/utillajes/ubicar/porEtiqueta")
     fun ubicarPorEtiqueta(@Body utillajeUbicacion: UtillajeUbicacion): Call<UtillajesTallasColeccion>
+
+    @POST("api/utillajes/alta/altaEjemplar")
+    fun altaEjemplar(@Body dto: AltaEjemplarDTO): Call<UtillajesTallasColeccion>
 }

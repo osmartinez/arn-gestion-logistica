@@ -1,5 +1,6 @@
 package com.arneplant.logisticainterna_kot2.network_implementation
 
+import com.arneplant.logisticainterna_kot2.model.dto.AltaEjemplarDTO
 import com.arneplant.logisticainterna_kot2.model.dto.UtillajeUbicacion
 import com.arneplant.logisticainterna_kot2.model.dto.UtillajesTallasColeccion
 import com.arneplant.logisticainterna_kot2.network.RetrofitInstance
@@ -7,7 +8,10 @@ import com.arneplant.logisticainterna_kot2.network_ifaces.IUtillajeService
 import retrofit2.Call
 
 class UtillajeService:IUtillajeService {
-    
+    override fun altaEjemplar(dto: AltaEjemplarDTO): Call<UtillajesTallasColeccion> {
+        return service.altaEjemplar(dto)
+    }
+
     private var service: IUtillajeService = RetrofitInstance.getRetrofitInstance()!!.create(
         IUtillajeService::class.java)
 

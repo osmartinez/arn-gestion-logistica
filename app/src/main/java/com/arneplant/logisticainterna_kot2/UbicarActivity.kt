@@ -1,9 +1,13 @@
 package com.arneplant.logisticainterna_kot2
 
+import android.content.DialogInterface
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.arneplant.logisticainterna_kot2.adapter.UbicacionAdapter
 import com.arneplant.logisticainterna_kot2.application.Store
 import com.arneplant.logisticainterna_kot2.delegate.BuscadorFragmentDelegate
@@ -78,7 +82,7 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if (response.isSuccessful) {
                         actualizarUbicacion(cod, codUbicacion)
-                        MqttCliente.ubicar(cod,codUbicacion)
+                        MqttCliente.ubicar(cod, codUbicacion)
                     }
                 }
             })
@@ -194,8 +198,14 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                     response: Response<UtillajesTallasColeccion>
                 ) {
                     if (response.isSuccessful && response.body() != null) {
-                        actualizarUbicacion(response.body()!!)
-                        MqttCliente.ubicar(cod,codUbicacion)
+                        if (!response.body()!!.codigoEtiqueta.isNullOrEmpty()) {
+                            actualizarUbicacion(response.body()!!)
+                            MqttCliente.ubicar(cod, codUbicacion)
+                        } else {
+                            // crear utillaje + ubicar
+                            crearEjemplar(cod, codUbicacion)
+                        }
+
                     } else {
                         (frgLog as LogFragment).log("Error de respuesta", false)
                         buzzer?.start()
@@ -204,6 +214,95 @@ class UbicarActivity : AppCompatActivity(), BuscadorFragmentDelegate {
 
             })
         }
+    }
+
+    private fun crearEjemplar(cod: String, codUbicacion: String) {
+        buzzer?.start()
+
+        val builder = AlertDialog.Builder(this)
+        val inflater = layoutInflater
+        builder.setTitle("Nuevo ejemplar")
+        builder.setCancelable(false)
+
+        val dialogLayout = inflater.inflate(R.layout.alta_ejemplar_layout, null)
+        val etCodigoUtillaje = dialogLayout.findViewById<EditText>(R.id.codigoUtillaje)
+        val etTallaUtillaje = dialogLayout.findViewById<EditText>(R.id.tallaUtillaje)
+        val etCodigoBarras = dialogLayout.findViewById<EditText>(R.id.codigoBarras)
+        builder.setView(dialogLayout)
+        builder.setNegativeButton(
+            "CANCELAR",
+            DialogInterface.OnClickListener { dialog, i -> dialog.dismiss() })
+        builder.setPositiveButton("OK", DialogInterface.OnClickListener { dialogInterface, i ->
+            run {
+                var codUtillajeFinal = ""
+                var tallaFinal = ""
+                var codUtillajeInicial = etCodigoUtillaje.text.toString().trim()
+                var tallaInicial = etTallaUtillaje.text.toString().trim()
+                var esPegado = codUtillajeFinal.contains("mp", ignoreCase = true)
+                codUtillajeInicial.replace("ml", "", ignoreCase = false)
+                codUtillajeInicial.replace("mp", "", ignoreCase = false)
+                var contador = 0
+                for (letra in codUtillajeInicial) {
+
+                    codUtillajeFinal += letra
+                    if (!letra.isDigit()) {
+                        contador++
+                    }
+                }
+                codUtillajeFinal = codUtillajeFinal.padStart(5+contador, '0')
+                if (esPegado) {
+                    codUtillajeFinal = "MP" + codUtillajeFinal
+                } else {
+                    codUtillajeFinal = "ML" + codUtillajeFinal
+                }
+
+                if (tallaInicial.length == 1 || (tallaInicial.contains(
+                        "m",
+                        ignoreCase = true
+                    ) && tallaInicial.length == 2)
+                ) {
+                    tallaInicial = "0" + tallaInicial
+                }
+
+                tallaFinal = tallaInicial
+
+                val dtoAlta = AltaEjemplarDTO(
+                    cod,
+                    tallaFinal.toUpperCase(),
+                    codUtillajeFinal.toUpperCase(),
+                    ""
+                )
+
+
+                val service = UtillajeService()
+                val utillajeUbicacion = UtillajeUbicacion()
+                val call = service.altaEjemplar(dtoAlta)
+                call.enqueue(object : Callback<UtillajesTallasColeccion> {
+                    override fun onFailure(call: Call<UtillajesTallasColeccion>, t: Throwable) {
+                        (frgLog as LogFragment).log("Error de protocolo", false)
+                        buzzer?.start()
+                    }
+
+                    override fun onResponse(
+                        call: Call<UtillajesTallasColeccion>,
+                        response: Response<UtillajesTallasColeccion>
+                    ) {
+                        if (response.isSuccessful && response.body() != null) {
+                            ubicarUtillaje(response.body()!!.codigoEtiqueta)
+
+                        } else {
+                            (frgLog as LogFragment).log("Error de respuesta", false)
+                            buzzer?.start()
+                        }
+                    }
+
+                })
+            }
+        })
+        builder.show()
+        etCodigoBarras.setText(cod)
+
+
     }
 
     private fun findMaquina(cod: String) {
