@@ -24,13 +24,17 @@ class SegundoTabFragment: Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.tab2_fragment, container, false)
 
-        view.btImprimirHojaProduccion.setOnClickListener { MqttCliente.imprimirHojaProduccion(Store.ID_OPERARIO) }
+        view.btImprimirHojaProduccion.setOnClickListener { /*MqttCliente.imprimirHojaProduccion(Store.ID_OPERARIO)*/ hojaProduccion() }
         view.btBuscarUtillaje.setOnClickListener { buscarUtillaje() }
         view.btProgramar.setOnClickListener {verProgramacion() }
 
         return view
     }
 
+    fun hojaProduccion(){
+        val intent = Intent(activity, HojaProduccionActivity::class.java)
+        startActivity(intent)
+    }
 
     fun verProgramacion(){
         val intent = Intent(activity, ProgramacionMaquinaActivity::class.java)

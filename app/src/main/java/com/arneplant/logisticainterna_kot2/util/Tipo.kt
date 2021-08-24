@@ -16,4 +16,5 @@ enum class Tipo {
     Maquina,
     Barquilla,
     Utillaje,
+    OperacionOperario,
 }

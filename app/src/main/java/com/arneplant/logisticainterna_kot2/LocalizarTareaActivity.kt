@@ -136,7 +136,7 @@ class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                 if (response.isSuccessful && response.body() != null) {
                     ubicaciones.clear()
                     var ubs = response.body()!!
-                    ubs = ubs.sortedBy { it.isEjecucion }
+                    ubs = ubs.sortedBy { !it.isEsMaquina}
 
                     var ejecucionUbs = ubs.filter { x -> x.isEjecucion }
                     for (ub in ejecucionUbs) {
@@ -148,7 +148,6 @@ class LocalizarTareaActivity : AppCompatActivity(), BuscadorFragmentDelegate {
                                     x.talla == ub.talla
                         }
                     }
-
 
                     for(maquina in ubs.filter { x->x.isEsMaquina }){
                         var listaAux = ArrayList<UbicacionTarea>()

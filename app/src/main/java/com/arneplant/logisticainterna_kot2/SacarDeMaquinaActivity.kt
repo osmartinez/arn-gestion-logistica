@@ -132,7 +132,24 @@ class SacarDeMaquinaActivity : AppCompatActivity(), BuscadorFragmentDelegate,
             Tipo.Barquilla -> {
                 consumirBarquilla(msg)
             }
+            Tipo.OperacionOperario->{
+                hacerOperacionOperario(msg)
+            }
         }
+    }
+
+    /**
+     *
+     */
+    private fun hacerOperacionOperario(cod: String){
+        if (Store.ID_OPERARIO == 0) {
+            Dialogos.mostrarDialogoInformacion("Debes entrar con tu cuenta de usuario", this)
+            buzzer?.start()
+            return
+        }
+
+        val serviceOperarios = OperarioService()
+
     }
 
     private fun consumirBarquilla(cod: String) {

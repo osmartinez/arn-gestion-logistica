@@ -34,6 +34,9 @@ object Utils {
         else if (cod.startsWith("06")) {
             Tipo.Utillaje
         }
+        else if(cod.startsWith("07")){
+            Tipo.OperacionOperario
+        }
         else {
             Tipo.None
         }
