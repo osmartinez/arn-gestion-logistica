@@ -1,0 +1,70 @@
+<LinearLayout
+    android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="1dp" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="MEDIR ANTIESTATICO"
+            android:padding="7dp"
+            android:id="@+id/tbDescripcion"
+            android:textSize="16sp"
+            android:background="@color/fbutton_color_midnight_blue"
+            android:clickable="true"
+            android:textColor="@color/white" />
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btEliminar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:textSize="18dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="x"
+            android:backgroundTint="@color/red"
+            android:autoText="true"
+            android:padding="1dp"
+            android:textColor="@color/white" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/panelUbicacion1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:background="@color/fbutton_color_carrot">
+
+        <TextView
+            android:id="@+id/tbFechaInicioLabor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/tbaux"
+            android:layout_alignParentLeft="true"
+            android:padding="5sp"
+            android:text="a las 10:32"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="false"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/tbaux">
+
+        </TextView>
+
+
+    </RelativeLayout>
+
+</LinearLayout>

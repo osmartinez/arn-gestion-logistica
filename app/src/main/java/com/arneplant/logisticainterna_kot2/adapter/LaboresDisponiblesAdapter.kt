@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.arneplant.logisticainterna_kot2.R
+import com.arneplant.logisticainterna_kot2.delegate.RegistrarLaborOperarioDelegate
 import com.arneplant.logisticainterna_kot2.delegate.RestaurarConsumosDelegate
 import com.arneplant.logisticainterna_kot2.model.Labor
 import com.arneplant.logisticainterna_kot2.model.Maquina
@@ -25,13 +26,16 @@ import kotlinx.android.synthetic.main.entry_labor_disponible.view.*
 class LaboresDisponiblesAdapter : RecyclerView.Adapter<LaboresDisponiblesAdapter.ViewHolder>() {
     var superheros: MutableList<Labor>  = ArrayList()
     lateinit var context:Context
-    fun LaboresDisponiblesAdapter(superheros : MutableList<Labor>, context: Context){
+    var registrarDelegate : RegistrarLaborOperarioDelegate? = null
+
+    fun LaboresDisponiblesAdapter(superheros : MutableList<Labor>, context: Context,registrarDelegate: RegistrarLaborOperarioDelegate){
         this.superheros = superheros
         this.context = context
+        this.registrarDelegate = registrarDelegate
     }
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = superheros.get(position)
-        holder.bind(item, context)
+        holder.bind(item, context,registrarDelegate)
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -40,13 +44,18 @@ class LaboresDisponiblesAdapter : RecyclerView.Adapter<LaboresDisponiblesAdapter
     override fun getItemCount(): Int {
         return superheros.size
     }
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val superheroName = view.findViewById(R.id.boton) as info.hoang8f.widget.FButton
 
-        fun bind(superhero:Labor, context: Context){
-            superheroName.text = superhero.descripcion
+        fun bind(labor:Labor, context: Context,registrarDelegate: RegistrarLaborOperarioDelegate?){
+            superheroName.text = labor.descripcion
 
-            itemView.setOnClickListener(View.OnClickListener { Toast.makeText(context, superhero.descripcion, Toast.LENGTH_SHORT).show() })
+            superheroName.setOnClickListener{
+                if(registrarDelegate!=null){
+                    registrarDelegate.registrar(labor)
+                }
+            }
         }
 
     }
